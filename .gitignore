@@ -1,0 +1,14 @@
+.env
+.idea/*
+node_modules/*
+.idea/
+.~lock.wi-api-server.xlsx#
+
+# upload file dir
+uploads/*
+package-lock.json
+data/*
+wi-images/*
+config/production.json
+server/custom-fill/data.json
+
