@@ -6,21 +6,19 @@
     "port": 3306,
     "user": "root",
     "password": "qwertyui",
-    "logging": true,
+    "logging": false,
     //Logging all database query if is set "true"
     "storage": "/tmp/wi_backend.sqlite",
     //Path to database.sqlite (used for sqlite only)
-    "dbName": "wi_backend"
+    "dbName": "wi_users"
   },
   "backend_service": {
-    "host": "http://192.168.1.11",
+    "host": "http://dev.sflow.me",
     "port": 3000
   },
   "Application": {
-    "port": 3000
-  },
-  "curveBasePath": "../data",
-  "imageBasePath": "wi-images"
+    "port": 2999
+  }
 }
 
 // should ignore from git

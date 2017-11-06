@@ -19,7 +19,7 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING(100),
             allowNull: true,
             defaultValue: "Inactive"
-            // defaultValue: "Actived"
+            // defaultValue: "Active"
         },
         /*
         1 : Administrator
