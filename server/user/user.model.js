@@ -89,7 +89,7 @@ function deleteUser(userInfo, done) {
                         options,
                         function (error, response, body) {
                             if (error) {
-                                done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
+                                return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
                             }
 
                             if (body.code == 200) {

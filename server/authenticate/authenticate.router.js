@@ -41,7 +41,7 @@ router.post('/login', function (req, res) {
                 } else {
                     if (user.status == "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "NOT_ACTIVATED"));
-                    } else if (user.status == "Actived") {
+                    } else if (user.status == "Active") {
                         /*var sequelize = user.sequelize;
                         var dbName = 'wi_' + user.username.toLowerCase();
                         sequelize.query('CREATE DATABASE IF NOT EXISTS ' + dbName).then(rs => {
