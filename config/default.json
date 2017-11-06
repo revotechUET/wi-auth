@@ -1,16 +1,23 @@
 {
-  "Database":{
-    "dialect":"mysql",  // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
-    "host":"localhost",
-    "port":3306,
-    "user":"root",
-    "password":"tanlm",
-    "logging":true,     //Logging all database query if is set "true"
-    "storage":"/tmp/wi_backend.sqlite", //Path to database.sqlite (used for sqlite only)
-    "dbName":"wi_backend"
+  "Database": {
+    "dialect": "mysql",
+    // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
+    "host": "localhost",
+    "port": 3306,
+    "user": "root",
+    "password": "qwertyui",
+    "logging": true,
+    //Logging all database query if is set "true"
+    "storage": "/tmp/wi_backend.sqlite",
+    //Path to database.sqlite (used for sqlite only)
+    "dbName": "wi_backend"
   },
-  "Application":{
-    "port":3000
+  "backend_service": {
+    "host": "http://192.168.1.11",
+    "port": 3000
+  },
+  "Application": {
+    "port": 3000
   },
   "curveBasePath": "../data",
   "imageBasePath": "wi-images"
