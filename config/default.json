@@ -14,7 +14,7 @@
   },
   "backend_service": {
     "host": "http://dev.sflow.me",
-    "port": 3000
+    "port": 80
   },
   "Application": {
     "port": 2999
