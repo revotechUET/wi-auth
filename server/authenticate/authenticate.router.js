@@ -128,7 +128,7 @@ router.post('/login', function (req, res) {
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     if (captchaList.get(req.body.captcha)) {
-        captchaList.delete(req.body.captcha);
+        // captchaList.delete(req.body.captcha);
         User.create({
             username: req.body.username,
             password: req.body.password,
