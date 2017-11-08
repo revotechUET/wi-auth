@@ -142,7 +142,7 @@ router.post('/register', function (req, res) {
             res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "USER_EXISTED"));
         })
     } else {
-        captchaList.delete(req.body.captcha);
+        // captchaList.delete(req.body.captcha);
         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "WRONG_CAPTCHA"));
     }
 });
