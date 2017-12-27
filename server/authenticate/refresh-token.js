@@ -62,6 +62,23 @@ let destroyRefreshToken = function (token, callback) {
         callback(null);
     });
 }
+
+let clearTokenByUser = function (idUser, callback) {
+    RefreshToken.findAll({where: {idUser: idUser}}).then(tokens => {
+        asyncEach(tokens, function (token, next) {
+            token.destroy().then(() => {
+                console.log("Deleted refresh token : ", token.refreshToken);
+                next();
+            }).catch(err => {
+                next();
+            });
+        }, function () {
+            callback(false, true);
+        });
+    }).catch(err => {
+        callback(err, null);
+    });
+}
 setTimeout(function () {
     console.log("Start clean refresh token");
     RefreshToken.findAll().then(tokens => {
@@ -83,6 +100,7 @@ setTimeout(function () {
         console.log(err);
     });
 }, 3000);
+
 setInterval(function () {
     console.log("=============>>>>Clean refresh token<<<<==============");
     RefreshToken.findAll().then(tokens => {
