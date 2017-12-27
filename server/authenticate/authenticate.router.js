@@ -7,63 +7,23 @@ var User = models.User;
 var ResponseJSON = require('../response');
 var ErrorCodes = require('../../error-codes').CODES;
 var jwt = require('jsonwebtoken');
-//var models = require('../models');
 var md5 = require('md5');
 let captchaList = require('../captcha/captcha').captchaList;
 router.use(bodyParser.json());
-
-// router.post('/login', function (req, res) {
-//     req.body.password = md5(req.body.password);
-//     User.findOne({where: {username: req.body.username}})
-//         .then(function (user) {
-//             if (!user) {
-//                 res.status(401).send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User not exist"))
-//             } else {
-//                 if (user.password != req.body.password) {
-//                     res.status(401).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Wrong password. Authenticate fail"))
-//                 } else {
-//                     var token = jwt.sign(req.body, 'secretKey', {expiresIn: '24h'});
-//                     res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
-//                 }
-//             }
-//         });
-// });
 
 router.post('/login', function (req, res) {
     req.body.password = md5(req.body.password);
     User.findOne({where: {username: req.body.username}})
         .then(function (user) {
             if (!user) {
-                res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "USER_NOT_EXISTS"));
+                res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
             } else {
                 if (user.password != req.body.password) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "WRONG_PASSWORD"));
+                    res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Password is not correct."));
                 } else {
                     if (user.status == "Inactive") {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "NOT_ACTIVATED"));
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     } else if (user.status == "Active") {
-                        /*var sequelize = user.sequelize;
-                        var dbName = 'wi_' + user.username.toLowerCase();
-                        sequelize.query('CREATE DATABASE IF NOT EXISTS ' + dbName).then(rs => {
-                            // console.log(rs[0].warningStatus);
-                            if (rs[0].warningStatus != 1) {
-                                var dbConnection = models(dbName);
-                                dbConnection.sequelize.sync()
-                                    .then(function () {
-                                        updateFamilyModel.syncFamilyData({username: user.username.toLowerCase()}, function (result) {
-                                            var token = jwt.sign(req.body, 'secretKey', {expiresIn: '24h'});
-                                            res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
-                                            console.log("Successfull update family for user : ", dbName);
-                                        });
-                                    })
-                                    .catch(function (err) {
-                                        console.log(dbName + err);
-                                    });
-                            } else {
-                                var token = jwt.sign(req.body, 'secretKey', {expiresIn: '24h'});
-                                res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
-                            }
-                        });*/
                         var request = require('request');
                         var dbName = 'wi_' + user.username.toLowerCase();
                         var host = config.host + ":" + config.port;
@@ -78,19 +38,19 @@ router.post('/login', function (req, res) {
                             options,
                             function (error, response, body) {
                                 if (error) {
-                                    return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "DATABASE_CREATION_FAIL"));
+                                    return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Backend Service problem."));
                                 }
 
                                 if (body.code == 200) {
                                     var token = jwt.sign(req.body, 'secretKey', {expiresIn: '24h'});
                                     return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
                                 }
-                                return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "DATABASE_CREATION_FAIL"));
+                                return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Backend Service problem."));
                             });
 
 
                     } else {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "NOT_ACTIVATED"));
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     }
                 }
             }
@@ -98,33 +58,6 @@ router.post('/login', function (req, res) {
 });
 
 
-// router.post('/register', function (req, res) {
-//     req.body.password = md5(req.body.password);
-//     User.create({username: req.body.username, password: req.body.password})
-//         .then(function (result) {
-//             //Create user's database;
-//             var sequelize = result.sequelize;
-//             var dbName = 'wi_' + result.username.toLowerCase();
-//             sequelize.query('CREATE DATABASE ' + dbName);
-//             //Create all tables then update family, family-condition
-//             var dbConnection = models(dbName);
-//             dbConnection.sequelize.sync()
-//                 .then(function () {
-//                     updateFamilyModel.syncFamilyData({username: result.username.toLowerCase()}, function (result) {
-//                         console.log("Successfull update family for user : ", dbName);
-//                     });
-//                 })
-//                 .catch(function (err) {
-//                     console.log(dbName + err);
-//                 });
-//             //Create token then send
-//             var token = jwt.sign(req.body, 'secretKey', {expiresIn: '1h'});
-//             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
-//         })
-//         .catch(function (err) {
-//             res.status(401).send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "User existed!"));
-//         })
-// });
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     if (captchaList.get(req.body.captcha)) {
@@ -139,11 +72,11 @@ router.post('/register', function (req, res) {
             var token = jwt.sign(req.body, 'secretKey', {expiresIn: '1h'});
             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
         }).catch(function (err) {
-            res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "USER_EXISTED"));
+            res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "User already exists!"));
         })
     } else {
         // captchaList.delete(req.body.captcha);
-        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "WRONG_CAPTCHA"));
+        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
     }
 });
 module.exports = router;

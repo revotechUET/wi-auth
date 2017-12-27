@@ -85,4 +85,14 @@ router.post('/user/delete', function (req, res) {
 
 });
 
+router.post('/user/dropdb', function (req, res) {
+    checkPass(req.body.token, function (passed) {
+        if (passed) {
+
+        } else {
+            res.status(200).send(response);
+        }
+    })
+});
+
 module.exports = router;

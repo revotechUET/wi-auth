@@ -9,18 +9,11 @@ module.exports = function () {
                 if (err) {
                     return res.status(401).json({code: 401, success: false, message: 'Failed to authenticate'});
                 } else {
-                    /*req.dbConnection = models('wi_' + decoded.username.toLowerCase(), (err) => {
-                        if (err) return res.status(401).json({code: 401, success: false, message: 'Some err'});
-                    });*/
                     req.decoded = decoded;
                     next();
 
                 }
             });
-
-            /*req.dbConnection = models('wi_hoangbd');
-            // req.decoded = decoded;
-            next();//TODO*/
         } else {
             return res.status(401).send({
                 code: 401,

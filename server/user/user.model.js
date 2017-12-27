@@ -111,6 +111,32 @@ function deleteUser(userInfo, done) {
     })
 }
 
+function dropDb(payload, done) {
+    var request = require('request');
+    var dbName = 'wi_' + payload.username.toLowerCase();
+    var host = config.host + ":" + config.port;
+    var options = {
+        uri: host + '/database/update',
+        method: 'DELETE',
+        json: {
+            "dbName": dbName
+        }
+    }
+    request(
+        options,
+        function (error, response, body) {
+            if (error) {
+                return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
+            }
+
+            if (body.code == 200) {
+                return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+            }
+            done(body);
+        });
+
+}
+
 module.exports = {
     createUser: createUser,
     infoUser: infoUser,
