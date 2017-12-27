@@ -22,13 +22,15 @@ sequelize.sync()
         console.log(err);
     });
 var models = [
-    'User'
+    'User',
+    'RefreshToken'
 ];
 models.forEach(function (model) {
     module.exports[model] = sequelize.import(__dirname + '/' + model);
 });
 
 (function (m) {
+    m.User.hasMany(m.RefreshToken, {foreignKey: {name: 'idUser', allowNull: false}, onDelete: 'CASCADE'});
     // m.FamilyCondition.belongsTo(m.Family, {foreignKey: 'idFamily'});
 })(module.exports);
 module.exports.sequelize = sequelize;
