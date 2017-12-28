@@ -20,9 +20,10 @@ router.post('/refresh-token', function (req, res) {
             User.findById(result.idUser).then(user => {
                 refreshTokenModel.renewRefreshToken(result.refreshToken, function (newToken) {
                     let token = jwt.sign({username: user.username}, secretKey, {expiresIn: '24h'});
-                    let response = ResponseJSON(ErrorCodes.SUCCESS, "Successful", token);
+                    let response = {};
+                    response.token = token;
                     response.refresh_token = newToken;
-                    res.status(200).send(response);
+                    res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
                 });
             })
         } else {
