@@ -62,7 +62,7 @@ router.post('/login', function (req, res) {
                                     return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Backend Service problem."));
                                 }
                                 if (body.code == 200) {
-                                    let token = jwt.sign(req.body, secretKey, {expiresIn: '24h'});
+                                    let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
                                     let response = new Object();
                                     response.token = token;
                                     refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
