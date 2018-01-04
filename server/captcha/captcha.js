@@ -27,11 +27,11 @@ var captchaList = new captchas();
 setInterval(function () {
     // console.log(captchaList.lenght);
     Object.keys(captchaList).forEach(function (captcha) {
-        if (Date.now() - captchaList.get(captcha).timestamp > 1000 * 60) {
+        if (Date.now() - captchaList.get(captcha).timestamp > 1000 * 60 * 60 * 3) {
             captchaList.delete(captcha);
         }
     });
-}, 10000);
+}, 100000);
 
 router.get("/captcha.png", function (req, res) {
     let randNumber = parseInt(Math.random() * 90000 + 10000);
