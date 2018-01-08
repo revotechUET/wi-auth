@@ -18,14 +18,18 @@ router.post('/refresh-token', function (req, res) {
     refreshTokenModel.checkRefreshToken(refreshToken, function (result) {
         if (result) {
             User.findById(result.idUser).then(user => {
-                refreshTokenModel.renewRefreshToken(result.refreshToken, function (newToken) {
-                    let token = jwt.sign({username: user.username}, secretKey, {expiresIn: '24h'});
-                    let response = {};
-                    response.token = token;
-                    response.refresh_token = newToken;
-                    res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
-                });
-            })
+                if (user.status !== "Active") {
+                    res.status(401).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation.", "You are not activated. Please wait for account activation."));
+                } else {
+                    refreshTokenModel.renewRefreshToken(result.refreshToken, function (newToken) {
+                        let token = jwt.sign({username: user.username}, secretKey, {expiresIn: '24h'});
+                        let response = {};
+                        response.token = token;
+                        response.refresh_token = newToken;
+                        res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
+                    });
+                }
+            });
         } else {
             res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Refresh token expired!"));
         }
