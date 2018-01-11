@@ -49,33 +49,13 @@ router.post('/login', function (req, res) {
                     if (user.status == "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     } else if (user.status == "Active") {
-                        var request = require('request');
-                        var dbName = 'wi_' + user.username.toLowerCase();
-                        var host = config.host + ":" + config.port;
-                        var options = {
-                            uri: host + '/database/update',
-                            method: 'POST',
-                            json: {
-                                "dbName": dbName
-                            }
-                        }
-                        request(
-                            options,
-                            function (error, response, body) {
-                                if (error) {
-                                    return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Backend Service problem."));
-                                }
-                                if (body.code == 200) {
-                                    let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
-                                    let response = new Object();
-                                    response.token = token;
-                                    refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
-                                        response.refresh_token = refreshToken;
-                                        return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                                    });
-                                }
-                                // return res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Backend Service problem."));
-                            });
+                        let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
+                        let response = new Object();
+                        response.token = token;
+                        refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
+                            response.refresh_token = refreshToken;
+                            return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                        });
                     } else {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     }
@@ -84,11 +64,9 @@ router.post('/login', function (req, res) {
         });
 });
 
-
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     if (captchaList.get(req.body.captcha)) {
-        // captchaList.delete(req.body.captcha);
         User.create({
             username: req.body.username,
             password: req.body.password,
@@ -102,7 +80,6 @@ router.post('/register', function (req, res) {
             res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "User already exists!"));
         })
     } else {
-        // captchaList.delete(req.body.captcha);
         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
     }
 });
