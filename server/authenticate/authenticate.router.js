@@ -71,6 +71,7 @@ router.post('/register', function (req, res) {
             username: req.body.username,
             password: req.body.password,
             fullname: req.body.fullname,
+            status: "Inactive",
             email: req.body.email
         }).then(function (result) {
             //Create token then send
