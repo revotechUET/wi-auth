@@ -31,7 +31,7 @@ router.post('/refresh-token', function (req, res) {
                 }
             });
         } else {
-            res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Refresh token expired!"));
+            res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Session expired!"));
         }
     });
 });
