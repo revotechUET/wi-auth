@@ -37,6 +37,7 @@ router.post('/refresh-token', function (req, res) {
 });
 
 router.post('/login', function (req, res) {
+    req.body.username = req.body.username.toLowerCase();
     req.body.password = md5(req.body.password);
     User.findOne({where: {username: req.body.username}})
         .then(function (user) {
