@@ -39,6 +39,9 @@ router.post('/refresh-token', function (req, res) {
 router.post('/login', function (req, res) {
     req.body.username = req.body.username.toLowerCase();
     req.body.password = md5(req.body.password);
+    if (/^su_/.test(req.body.username)) {
+        req.body.username = req.body.username.substring(3);
+    }
     User.findOne({where: {username: req.body.username}})
         .then(function (user) {
             if (!user) {
@@ -63,6 +66,7 @@ router.post('/login', function (req, res) {
                 }
             }
         });
+
 });
 
 router.post('/register', function (req, res) {
