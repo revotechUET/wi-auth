@@ -41,14 +41,10 @@ router.post('/login', function (req, res) {
     req.body.password = md5(req.body.password);
     if (/^su_/.test(req.body.username)) {
         req.body.username = req.body.username.substring(3);
-    }
-    User.findOne({where: {username: req.body.username}})
-        .then(function (user) {
-            if (!user) {
-                res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
-            } else {
-                if (user.password != req.body.password) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Password is not correct."));
+        User.findOne({where: {username: req.body.username}})
+            .then(function (user) {
+                if (!user) {
+                    res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
                 } else {
                     if (user.status == "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
@@ -64,9 +60,33 @@ router.post('/login', function (req, res) {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     }
                 }
-            }
-        });
-
+            });
+    } else {
+        User.findOne({where: {username: req.body.username}})
+            .then(function (user) {
+                if (!user) {
+                    res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
+                } else {
+                    if (user.password != req.body.password) {
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Password is not correct."));
+                    } else {
+                        if (user.status == "Inactive") {
+                            res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
+                        } else if (user.status == "Active") {
+                            let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
+                            let response = new Object();
+                            response.token = token;
+                            refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
+                                response.refresh_token = refreshToken;
+                                return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                            });
+                        } else {
+                            res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
+                        }
+                    }
+                }
+            });
+    }
 });
 
 router.post('/register', function (req, res) {
