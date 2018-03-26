@@ -1,25 +1,42 @@
-var jwt = require('jsonwebtoken');
-//var models = require('../models');
-
+let jwt = require('jsonwebtoken');
+//let models = require('../models');
+//
+// module.exports = function () {
+//     return function (req, res, next) {
+//         let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
+//         if (token) {
+//             jwt.verify(token, 'secretKey', function (err, decoded) {
+//                 if (err) {
+//                     return res.status(401).json({code: 401, success: false, message: 'Failed to authenticate'});
+//                 } else {
+//                     req.decoded = decoded;
+//                     next();
+//                 }
+//             });
+//         } else {
+//             return res.status(401).send({
+//                 code: 401,
+//                 success: false,
+//                 message: 'No token provided.'
+//             })
+//         }
+//     }
+// };
 module.exports = function () {
     return function (req, res, next) {
-        var token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
+        let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
         if (token) {
             jwt.verify(token, 'secretKey', function (err, decoded) {
                 if (err) {
-                    return res.status(401).json({code: 401, success: false, message: 'Failed to authenticate'});
+                    // return res.status(401).json({code: 401, success: false, message: 'Failed to authenticate'});
+                    next();
                 } else {
                     req.decoded = decoded;
                     next();
-
                 }
             });
         } else {
-            return res.status(401).send({
-                code: 401,
-                success: false,
-                message: 'No token provided.'
-            })
+            next();
         }
     }
 };

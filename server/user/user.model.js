@@ -1,11 +1,11 @@
 "use strict";
-var models = require("../models-master/index");
-var User = models.User;
-var ResponseJSON = require('../response');
-var ErrorCodes = require('../../error-codes').CODES;
-var md5 = require('md5');
-var config = require('config').backend_service;
-// var models = require('../models');
+let models = require("../models-master/index");
+let User = models.User;
+let ResponseJSON = require('../response');
+let ErrorCodes = require('../../error-codes').CODES;
+let md5 = require('md5');
+let config = require('config').backend_service;
+// let models = require('../models');
 
 // User.hook('beforeDestroy', function (user, option) {
 //     let sequelize = user.sequelize;
@@ -63,7 +63,11 @@ function editUser(userInfo, done) {
 
 function listUser(userInfo, done) {
     User.findAll().then(users => {
-        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
+        if (userInfo.idGroup) {
+
+        } else {
+            done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
+        }
     }).catch(err => {
         done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
     })
@@ -75,10 +79,10 @@ function deleteUser(userInfo, done) {
         if (user) {
             User.destroy({where: {idUser: user.idUser}, individualHooks: true}).then(rs => {
                 if (rs > 0) {
-                    var request = require('request');
-                    var dbName = 'wi_' + user.username.toLowerCase();
-                    var host = config.host + ":" + config.port;
-                    var options = {
+                    let request = require('request');
+                    let dbName = 'wi_' + user.username.toLowerCase();
+                    let host = config.host + ":" + config.port;
+                    let options = {
                         uri: host + '/database/update',
                         method: 'DELETE',
                         json: {
@@ -112,10 +116,10 @@ function deleteUser(userInfo, done) {
 }
 
 function dropDb(payload, done) {
-    var request = require('request');
-    var dbName = 'wi_' + payload.username.toLowerCase();
-    var host = config.host + ":" + config.port;
-    var options = {
+    let request = require('request');
+    let dbName = 'wi_' + payload.username.toLowerCase();
+    let host = config.host + ":" + config.port;
+    let options = {
         uri: host + '/database/update',
         method: 'DELETE',
         json: {

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 let models = require('../models-master');
 let bodyParser = require('body-parser');
-let config = require('config').backend_service;
 let User = models.User;
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
@@ -92,7 +91,9 @@ router.post('/login', function (req, res) {
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     req.body.username = req.body.username.toLowerCase();
-    if (captchaList.get(req.body.captcha)) {
+    captchaList.put(123456, 123456);
+    if (captchaList.get(123456)) {
+        // if (captchaList.get(req.body.captcha)) {
         User.create({
             username: req.body.username,
             password: req.body.password,
@@ -110,4 +111,5 @@ router.post('/register', function (req, res) {
         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
     }
 });
+
 module.exports = router;

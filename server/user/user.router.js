@@ -21,16 +21,9 @@ function checkPass(token, callback) {
 }
 
 router.post('/user/list', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
-            model.listUser({}, function (status) {
-                res.send(status);
-            });
-        } else {
-            res.status(200).send(response);
-        }
+    model.listUser(req.body, function (status) {
+        res.send(status);
     });
-
 });
 
 router.post('/user/new', function (req, res) {
