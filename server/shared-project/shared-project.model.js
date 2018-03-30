@@ -16,12 +16,25 @@ function createNewSharedProject(data, done, username) {
 }
 
 function addToGroup(data, done) {
-    Model.SharedProject.findById(data.idSharedProject).then(rs => {
-        rs.addGroups(data.idGroups);
-        done(ResponseJSON(200, 'Successfull', data));
-    }).catch(err => {
-        done(ResponseJSON(512, err, err));
-    });
+    if (data.type === "add") {
+        Model.SharedProject.findById(data.idSharedProject).then(rs => {
+            rs.addGroup(data.idGroup);
+            done(ResponseJSON(200, 'Successfull', data));
+        }).catch(err => {
+            done(ResponseJSON(512, err, err));
+        });
+    } else if (data.type === "remove") {
+        Model.SharedProject.findById(data.idSharedProject).then(rs => {
+            rs.removeGroup(data.idGroup);
+            done(ResponseJSON(200, 'Successfull', data));
+        }).catch(err => {
+            done(ResponseJSON(512, err, err));
+        });
+    } else {
+        done(ResponseJSON(512, "Type must be 'add' or 'remove'"));
+    }
+
+
 }
 
 function getSharedProjectList(data, done) {

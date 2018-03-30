@@ -7,13 +7,13 @@ router.use(bodyParser.json());
 router.post("/group/new", function (req, res) {
     groupModel.createNewGroup(req.body, function (data) {
         res.send(data);
-    });
+    }, req.decoded.username);
 });
 
 router.post("/group/list", function (req, res) {
     groupModel.listGroup(req.body, function (data) {
         res.send(data);
-    });
+    }, req.decoded.username);
 });
 
 router.post("/group/delete", function (req, res) {
