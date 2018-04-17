@@ -33,5 +33,15 @@ router.post("/group/remove-user", function (req, res) {
         res.send(data);
     });
 });
+router.post('/group/project-permission', function (req, res) {
+    groupModel.getProjectPermission(req.body, function (data) {
+        res.send(data);
+    })
+});
+router.post('/group/update-project-permission', function (req, res) {
+    groupModel.updateProjectPermission(req.body, function (data) {
+        res.send(data);
+    })
+});
 
 module.exports = router;

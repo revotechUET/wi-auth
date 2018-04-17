@@ -5,20 +5,7 @@ let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
 let md5 = require('md5');
 let config = require('config').backend_service;
-// let models = require('../models');
-
-// User.hook('beforeDestroy', function (user, option) {
-//     let sequelize = user.sequelize;
-//     let dbName = "wi_" + user.username.toLowerCase();
-//     sequelize.query("DROP DATABASE IF EXISTS " + dbName).then(rs => {
-//         let connetcion = models(dbName, function () {
-//
-//         }, true);
-//         console.log("Done query : DROP DATABASE IF EXISTS " + dbName);
-//     }).catch(err => {
-//         console.log(err);
-//     });
-// });
+let async = require('async');
 
 function createUser(userInfo, done) {
     userInfo.password = md5(userInfo.password);
@@ -88,7 +75,7 @@ function deleteUser(userInfo, done) {
                         json: {
                             "dbName": dbName
                         }
-                    }
+                    };
                     request(
                         options,
                         function (error, response, body) {
@@ -96,7 +83,7 @@ function deleteUser(userInfo, done) {
                                 return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
                             }
 
-                            if (body.code == 200) {
+                            if (body.code === 200) {
                                 return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
                             }
                             done(body);
@@ -125,7 +112,7 @@ function dropDb(payload, done) {
         json: {
             "dbName": dbName
         }
-    }
+    };
     request(
         options,
         function (error, response, body) {
@@ -133,7 +120,7 @@ function dropDb(payload, done) {
                 return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
             }
 
-            if (body.code == 200) {
+            if (body.code === 200) {
                 return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
             }
             done(body);
@@ -141,10 +128,53 @@ function dropDb(payload, done) {
 
 }
 
+function getPermission(payload, done, username) {
+    let _user = payload.username || username;
+    let permission = require('../utils/default-permission');
+    for (let key in permission) {
+        permission[key] = false;
+    }
+    if (!payload.project_name) {
+        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Need projectname"));
+    } else {
+        User.findOne({
+            where: {username: _user},
+            include: {
+                model: models.Group,
+            }
+        }).then(user => {
+            async.each(user.groups, function (group, nextGroup) {
+                models.Group.findById(group.idGroup, {
+                    include: {
+                        model: models.SharedProject,
+                        where: {project_name: payload.project_name}
+                    }
+                }).then(g => {
+                    if (g) {
+                        async.each(g.shared_projects, function (sharedProject, next) {
+                            for (let key in sharedProject.shared_project_group.permission) {
+                                permission[key] = permission[key] || sharedProject.shared_project_group.permission[key];
+                            }
+                            next();
+                        }, function () {
+                            nextGroup();
+                        });
+                    } else {
+                        nextGroup();
+                    }
+                })
+            }, function () {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", permission));
+            });
+        });
+    }
+}
+
 module.exports = {
     createUser: createUser,
     infoUser: infoUser,
     deleteUser: deleteUser,
     listUser: listUser,
-    editUser: editUser
-}
+    editUser: editUser,
+    getPermission: getPermission
+};

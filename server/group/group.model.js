@@ -39,6 +39,11 @@ async function listGroup(data, done, username) {
                 });
             });
         }, function () {
+            response.sort((a, b) => {
+                let nameA = a.name.toUpperCase();
+                let nameB = b.name.toUpperCase();
+                return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+            });
             done(responseJSON(200, "Successfull", response));
         });
     }).catch(err => {
@@ -88,10 +93,48 @@ function removeUser(data, done) {
     });
 }
 
+function getProjectPermission(data, done) {
+    if (!data.project_name) return done(responseJSON(512, "Need Project Name"));
+    Model.Group.findById(data.idGroup, {
+        include: {
+            model: Model.SharedProject,
+            where: {project_name: data.project_name}
+        }
+    }).then(group => {
+        if (!group) {
+            done(responseJSON(200, "Successfull", {}));
+        } else {
+            if (group.shared_projects.length !== 0) {
+                done(responseJSON(200, "Successfull", group.shared_projects[0].shared_project_group.permission));
+            } else {
+                done(responseJSON(200, "Successfull", {}));
+            }
+        }
+    });
+}
+
+function updateProjectPermission(data, done) {
+    Model.Group.findById(data.idGroup, {
+        include: {
+            model: Model.SharedProject,
+            where: {project_name: data.project_name}
+        }
+    }).then(group => {
+        if (group.shared_projects.length !== 0) {
+            group.setShared_projects([group.shared_projects[0].idSharedProject], {through: {permission: data.permission}});
+            done(responseJSON(200, "Successfull", group));
+        } else {
+            done(responseJSON(200, "Successfull", {}));
+        }
+    })
+}
+
 module.exports = {
     createNewGroup: createNewGroup,
     listGroup: listGroup,
     deleteGroup: deleteGroup,
     addUserToGroup: addUserToGroup,
-    removeUser: removeUser
+    removeUser: removeUser,
+    getProjectPermission: getProjectPermission,
+    updateProjectPermission: updateProjectPermission
 };

@@ -29,6 +29,7 @@ module.exports = function () {
             jwt.verify(token, 'secretKey', function (err, decoded) {
                 if (err) {
                     // return res.status(401).json({code: 401, success: false, message: 'Failed to authenticate'});
+                    req.decoded = {};
                     next();
                 } else {
                     req.decoded = decoded;

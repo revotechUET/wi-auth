@@ -18,7 +18,9 @@ function createNewSharedProject(data, done, username) {
 function addToGroup(data, done) {
     if (data.type === "add") {
         Model.SharedProject.findById(data.idSharedProject).then(rs => {
-            rs.addGroup(data.idGroup);
+            let defaultPerm = require('../utils/default-permission');
+            rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
+            // console.log(defaultPerm);
             done(ResponseJSON(200, 'Successfull', data));
         }).catch(err => {
             done(ResponseJSON(512, err, err));

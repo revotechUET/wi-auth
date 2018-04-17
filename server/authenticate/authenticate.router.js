@@ -102,7 +102,7 @@ router.post('/register', function (req, res) {
             email: req.body.email
         }).then(function (result) {
             //Create token then send
-            var token = jwt.sign(req.body, secretKey, {expiresIn: '1h'});
+            let token = jwt.sign(req.body, secretKey, {expiresIn: '1h'});
             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
         }).catch(function (err) {
             res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "User already exists!"));

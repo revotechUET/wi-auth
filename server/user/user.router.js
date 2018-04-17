@@ -1,7 +1,7 @@
-var express = require('express');
-var router = express.Router();
-var model = require('./user.model');
-var bodyParser = require('body-parser');
+let express = require('express');
+let router = express.Router();
+let model = require('./user.model');
+let bodyParser = require('body-parser');
 router.use(bodyParser.json());
 
 const myKey = "f82e62d7c3ea69cc12b5cdb8d621dab6";
@@ -86,6 +86,12 @@ router.post('/user/dropdb', function (req, res) {
             res.status(200).send(response);
         }
     })
+});
+
+router.post('/user/get-permission', function (req, res) {
+    model.getPermission(req.body, function (status) {
+        res.send(status)
+    }, req.decoded.username);
 });
 
 module.exports = router;
