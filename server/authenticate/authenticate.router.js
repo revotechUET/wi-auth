@@ -45,11 +45,11 @@ router.post('/login', function (req, res) {
                 if (!user) {
                     res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
                 } else {
-                    if (user.status == "Inactive") {
+                    if (user.status === "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
-                    } else if (user.status == "Active") {
+                    } else if (user.status === "Active") {
                         let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
-                        let response = new Object();
+                        let response = {};
                         response.token = token;
                         refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
                             response.refresh_token = refreshToken;
@@ -66,14 +66,14 @@ router.post('/login', function (req, res) {
                 if (!user) {
                     res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
                 } else {
-                    if (user.password != req.body.password) {
+                    if (user.password !== req.body.password) {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Password is not correct."));
                     } else {
-                        if (user.status == "Inactive") {
+                        if (user.status === "Inactive") {
                             res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
-                        } else if (user.status == "Active") {
+                        } else if (user.status === "Active") {
                             let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
-                            let response = new Object();
+                            let response = {};
                             response.token = token;
                             refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
                                 response.refresh_token = refreshToken;
