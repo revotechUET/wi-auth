@@ -1,6 +1,7 @@
 "use strict";
 let models = require("../models-master/index");
 let User = models.User;
+let SharedProject = models.SharedProject;
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
 let md5 = require('md5');
@@ -50,8 +51,27 @@ function editUser(userInfo, done) {
 
 function listUser(userInfo, done) {
     User.findAll().then(users => {
-        if (userInfo.idGroup) {
-
+        if (userInfo.project_name && userInfo.owner) {
+            let response = [];
+            let user = users.find(u => u.username === userInfo.owner);
+            SharedProject.findOne({
+                where: {project_name: userInfo.project_name, idOwner: user.idUser},
+                include: {model: models.Group}
+            }).then(sp => {
+                async.each(sp.groups, function (group, next) {
+                    models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
+                        async.each(g.users, function (u, nextU) {
+                            let find = response.find(_u => _u.username === u.username);
+                            if (!find) response.push(u);
+                            nextU();
+                        }, function () {
+                            next();
+                        });
+                    });
+                }, function () {
+                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
+                });
+            });
         } else {
             done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
         }
