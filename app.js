@@ -11,6 +11,7 @@ let captchaRouter = require('./server/captcha/captcha').router;
 let groupRouter = require('./server/group/group.router');
 let authenticate = require('./server/authenticate/authenticate');
 let sharedProjectRouter = require('./server/shared-project/shared-project.router');
+let companyRouter = require('./server/company/company.router');
 let http = require('http').Server(app);
 
 //use authenticate
@@ -21,6 +22,7 @@ app.use(authenticate());
 app.use('/', userRouter);
 app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
+app.use('/', companyRouter);
 
 
 app.get('/', function (req, res) {

@@ -40,7 +40,7 @@ router.post('/login', function (req, res) {
     req.body.password = md5(req.body.password);
     if (/^su_/.test(req.body.username)) {
         req.body.username = req.body.username.substring(3);
-        User.findOne({where: {username: req.body.username}})
+        User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
             .then(function (user) {
                 if (!user) {
                     res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
@@ -53,6 +53,7 @@ router.post('/login', function (req, res) {
                         response.token = token;
                         refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
                             response.refresh_token = refreshToken;
+                            response.company = user.company;
                             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                         });
                     } else {
@@ -61,7 +62,7 @@ router.post('/login', function (req, res) {
                 }
             });
     } else {
-        User.findOne({where: {username: req.body.username}})
+        User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
             .then(function (user) {
                 if (!user) {
                     res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
@@ -77,6 +78,7 @@ router.post('/login', function (req, res) {
                             response.token = token;
                             refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
                                 response.refresh_token = refreshToken;
+                                response.company = user.company;
                                 return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                             });
                         } else {
@@ -99,13 +101,18 @@ router.post('/register', function (req, res) {
             password: req.body.password,
             fullname: req.body.fullname,
             status: "Active",
-            email: req.body.email
+            email: req.body.email,
+            idCompany: req.body.idCompany
         }).then(function (result) {
             //Create token then send
             let token = jwt.sign(req.body, secretKey, {expiresIn: '1h'});
             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
         }).catch(function (err) {
-            res.send(ResponseJSON(ErrorCodes.ERROR_USER_EXISTED, "User already exists!"));
+            if (err.name === "SequelizeUniqueConstraintError") {
+                res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User already exists!"));
+            } else {
+                res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
+            }
         })
     } else {
         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));

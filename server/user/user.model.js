@@ -50,7 +50,8 @@ function editUser(userInfo, done) {
 }
 
 function listUser(userInfo, done) {
-    User.findAll().then(users => {
+    let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
+    User.findAll({where: conditions}).then(users => {
         if (userInfo.project_name && userInfo.owner) {
             let response = [];
             let user = users.find(u => u.username === userInfo.owner);

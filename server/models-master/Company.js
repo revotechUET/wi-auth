@@ -1,6 +1,6 @@
 module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('group', {
-        idGroup: {
+    return sequelize.define('company', {
+        idCompany: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             allowNull: false,
@@ -9,9 +9,13 @@ module.exports = function (sequelize, DataTypes) {
         name: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            unique: "name-idCompany"
+            unique: true
         },
         description: {
+            type: DataTypes.STRING(250),
+            allowNull: true
+        },
+        location: {
             type: DataTypes.STRING(250),
             allowNull: true
         }

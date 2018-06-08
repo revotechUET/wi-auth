@@ -13,8 +13,12 @@ async function createNewGroup(data, done, username) {
 }
 
 async function listGroup(data, done, username) {
+    let conditions = data.idCompany ? {idCompany: data.idCompany} : {};
     let user = await Model.User.findOne({where: {username: username}});
-    Model.Group.findAll({include: [{model: Model.User}, {model: Model.SharedProject}]}).then(groups => {
+    Model.Group.findAll({
+        include: [{model: Model.User}, {model: Model.SharedProject}],
+        where: conditions
+    }).then(groups => {
         let response = [];
         async.each(groups, function (group, nextGroup) {
             group = group.toJSON();
