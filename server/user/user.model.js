@@ -59,19 +59,25 @@ function listUser(userInfo, done) {
                 where: {project_name: userInfo.project_name, idOwner: user.idUser},
                 include: {model: models.Group}
             }).then(sp => {
-                async.each(sp.groups, function (group, next) {
-                    models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
-                        async.each(g.users, function (u, nextU) {
-                            let find = response.find(_u => _u.username === u.username);
-                            if (!find) response.push(u);
-                            nextU();
-                        }, function () {
-                            next();
+                if (sp) {
+                    async.each(sp.groups, function (group, next) {
+                        models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
+                            async.each(g.users, function (u, nextU) {
+                                let find = response.find(_u => _u.username === u.username);
+                                if (!find) response.push(u);
+                                nextU();
+                            }, function () {
+                                next();
+                            });
                         });
+                    }, function () {
+                        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                     });
-                }, function () {
-                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
-                });
+                } else {
+                    let r = [];
+                    r.push(user);
+                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", r));
+                }
             });
         } else {
             done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
