@@ -4,7 +4,10 @@ let ErrorCodes = require('../../error-codes').CODES;
 
 function createCompany(payload, callback) {
     models.Company.create(payload).then(com => {
-        callback(ResponseJSON(errorCodes.SUCCESS, "Successfull", com));
+        callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", com));
+    }).catch(err=>{
+        console.log(err);
+        callback(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
     });
 }
 
