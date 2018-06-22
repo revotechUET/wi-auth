@@ -14,6 +14,18 @@ let sharedProjectRouter = require('./server/shared-project/shared-project.router
 let companyRouter = require('./server/company/company.router');
 let http = require('http').Server(app);
 
+app.get('/e', (req,res) => {
+
+    const {url, baseUrl, originalUrl, path} = req;
+    
+    res.json({
+        path,
+        url,
+        baseUrl,
+        originalUrl
+    })
+})
+
 //use authenticate
 app.use(cors());
 app.use('/', authenRouter);
