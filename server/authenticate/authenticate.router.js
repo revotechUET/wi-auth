@@ -48,7 +48,8 @@ router.post('/login', function (req, res) {
                     if (user.status === "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     } else if (user.status === "Active") {
-                        let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
+                        let data = {...req.body, role: user.role};
+                        let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                         let response = {};
                         response.token = token;
                         refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
@@ -73,7 +74,8 @@ router.post('/login', function (req, res) {
                         if (user.status === "Inactive") {
                             res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                         } else if (user.status === "Active") {
-                            let token = jwt.sign(req.body, secretKey, {expiresIn: '48h'});
+                            let data = {...req.body, role: user.role};
+                            let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                             let response = {};
                             response.token = token;
                             refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {

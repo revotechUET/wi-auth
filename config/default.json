@@ -4,13 +4,13 @@
     // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
     "host": "localhost",
     "port": 3306,
-    "user": "root",
-    "password": "qwertyui",
+    "user": "wi_auth",
+    "password": "@Abc123456",
     "logging": false,
     //Logging all database query if is set "true"
     "storage": "/tmp/wi_backend.sqlite",
     //Path to database.sqlite (used for sqlite only)
-    "dbName": "wi_users"
+    "dbName": "bmq_database"
   },
   "backend_service": {
     "host": "http://dev.sflow.me",
