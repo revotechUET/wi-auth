@@ -93,8 +93,8 @@ router.post('/login', function (req, res) {
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     req.body.username = req.body.username.toLowerCase();
-    captchaList.put(123456, 123456);
-    if (captchaList.get(123456)) {
+    // captchaList.put(123456, 123456);
+    if (true) {
         // if (captchaList.get(req.body.captcha)) {
         User.create({
             username: req.body.username,
@@ -113,9 +113,9 @@ router.post('/register', function (req, res) {
             } else {
                 res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
             }
-        })
+        });
     } else {
-        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
+        // res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
     }
 });
 

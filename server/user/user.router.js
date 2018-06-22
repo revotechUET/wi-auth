@@ -4,22 +4,6 @@ let model = require('./user.model');
 let bodyParser = require('body-parser');
 router.use(bodyParser.json());
 
-const myKey = "f82e62d7c3ea69cc12b5cdb8d621dab6";
-
-let response = {
-    code: 500,
-    reason: "Authorization failed",
-    content: "Authorization failed"
-}
-
-function checkPass(token, callback) {
-    if (token == myKey) {
-        callback(true);
-    } else {
-        callback(false);
-    }
-}
-
 router.post('/user/list', function (req, res) {
     model.listUser(req.body, function (status) {
         res.send(status);
@@ -27,65 +11,31 @@ router.post('/user/list', function (req, res) {
 });
 
 router.post('/user/new', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
-            model.createUser(req.body, function (status) {
-                res.send(status);
-            });
-        } else {
-            res.status(200).send(response);
-        }
+    model.createUser(req.body, function (status) {
+        res.send(status);
     });
-
 });
 
 router.post('/user/info', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
-            model.infoUser(req.body, function (status) {
-                res.send(status);
-            });
-        } else {
-            res.status(200).send(response);
-        }
+    model.infoUser(req.body, function (status) {
+        res.send(status);
     });
-
 });
 
 router.post('/user/edit', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
-            model.editUser(req.body, function (status) {
-                res.send(status);
-            });
-        } else {
-            res.status(200).send(response);
-        }
+    model.editUser(req.body, function (status) {
+        res.send(status);
     });
-
 });
 
 router.post('/user/delete', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
-            model.deleteUser(req.body, function (status) {
-                res.send(status);
-            });
-        } else {
-            res.status(200).send(response);
-        }
+    model.deleteUser(req.body, function (status) {
+        res.send(status);
     });
-
 });
 
 router.post('/user/dropdb', function (req, res) {
-    checkPass(req.body.token, function (passed) {
-        if (passed) {
 
-        } else {
-            res.status(200).send(response);
-        }
-    })
 });
 
 router.post('/user/get-permission', function (req, res) {

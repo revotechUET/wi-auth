@@ -26,7 +26,7 @@ app.use('/', companyRouter);
 
 
 app.get('/', function (req, res) {
-    res.send("Welcome to WI-Authentication");
+    res.send("Welcome to WI-Authentication Service");
 });
 http.listen(config.port, function () {
     console.log("Listening on port " + config.port);
