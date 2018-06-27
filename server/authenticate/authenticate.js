@@ -21,7 +21,7 @@ module.exports = function () {
 
                 if (err) return res
                     .status(401)
-                    .json({ code: 401, success: false, message: 'Failed to authenticate' });
+                    .json({code: 401, success: false, message: 'Failed to authenticate'});
 
                 req.decoded = decoded;
                 next();

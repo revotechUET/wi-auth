@@ -8,24 +8,33 @@ let ErrorCodes = require('../../error-codes').CODES;
 let jwt = require('jsonwebtoken');
 let md5 = require('md5');
 let refreshTokenModel = require('./refresh-token');
-let captchaList = require('../captcha/captcha').captchaList;
+// let captchaList = require('../captcha/captcha').captchaList;
 let secretKey = "secretKey";
 router.use(bodyParser.json());
 
 router.post('/refresh-token', function (req, res) {
     let refreshToken = req.body.refresh_token || req.query.refresh_token || req.header['x-access-refresh-token'];
+    let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
     refreshTokenModel.checkRefreshToken(refreshToken, function (result) {
         if (result) {
             User.findById(result.idUser).then(user => {
                 if (user.status !== "Active") {
                     res.status(401).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation.", "You are not activated. Please wait for account activation."));
                 } else {
-                    refreshTokenModel.renewRefreshToken(result.refreshToken, function (newToken) {
-                        let token = jwt.sign({username: user.username}, secretKey, {expiresIn: '24h'});
-                        let response = {};
-                        response.token = token;
-                        response.refresh_token = newToken;
-                        res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
+                    refreshTokenModel.renewRefreshToken(result.refreshToken, function (newRefreshToken) {
+                        jwt.verify(token, secretKey, function (err, decoded) {
+                            delete decoded.iat;
+                            delete decoded.exp;
+                            if (err) {
+                                res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Session expired!"));
+                            } else {
+                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '24h'});
+                                let response = {};
+                                response.token = accessToken;
+                                response.refresh_token = newRefreshToken;
+                                res.status(200).send(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", response));
+                            }
+                        });
                     });
                 }
             });
@@ -48,7 +57,7 @@ router.post('/login', function (req, res) {
                     if (user.status === "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     } else if (user.status === "Active") {
-                        let data = {...req.body, role: user.role};
+                        let data = {username: user.username, whoami: req.body.whoami, role: user.role};
                         let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                         let response = {};
                         response.token = token;
@@ -74,7 +83,7 @@ router.post('/login', function (req, res) {
                         if (user.status === "Inactive") {
                             res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                         } else if (user.status === "Active") {
-                            let data = {...req.body, role: user.role};
+                            let data = {username: user.username, whoami: req.body.whoami, role: user.role};
                             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                             let response = {};
                             response.token = token;

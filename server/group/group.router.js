@@ -13,7 +13,7 @@ router.post("/group/new", function (req, res) {
 router.post("/group/list", function (req, res) {
     groupModel.listGroup(req.body, function (data) {
         res.send(data);
-    }, req.decoded.username);
+    }, req.decoded);
 });
 
 router.post("/group/delete", function (req, res) {

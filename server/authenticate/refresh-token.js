@@ -1,8 +1,5 @@
 let models = require("../models-master/index");
 let RefreshToken = models.RefreshToken;
-let ResponseJSON = require('../response');
-let ErrorCodes = require('../../error-codes').CODES;
-let md5 = require('md5');
 let randToken = require('rand-token');
 const asyncEach = require('async/each');
 const TIME_OUT = 1000 * 60 * 60 * 24;
@@ -121,7 +118,7 @@ setInterval(function () {
     }).catch(err => {
         console.log(err);
     });
-}, 1000 * 60 * 60 * 24);
+}, 1000 * 60 * 60 * 12);
 module.exports = {
     createRefreshToken: createRefreshToken,
     checkRefreshToken: checkRefreshToken,

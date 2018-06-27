@@ -12,47 +12,65 @@ async function createNewGroup(data, done, username) {
     });
 }
 
-async function listGroup(data, done, username) {
-    let conditions = data.idCompany ? {idCompany: data.idCompany} : {};
-    let user = await Model.User.findOne({where: {username: username}});
-    Model.Group.findAll({
-        include: [{model: Model.User}, {model: Model.SharedProject}],
-        where: conditions
-    }).then(groups => {
-        let response = [];
-        async.each(groups, function (group, nextGroup) {
-            group = group.toJSON();
-            group.canDelete = false;
-            // group.canEdit = false;
-            let arr = [];
-            async.each(group.shared_projects, function (shared_project, next) {
-                if (shared_project.idOwner === user.idUser) {
-                    arr.push(shared_project);
-                    next();
-                } else {
-                    next();
-                }
-            }, function () {
-                async.each(group.users, function (_user, nextUser) {
-                    if (_user.user_group_permission.permission === 1 && _user.idUser === user.idUser) group.canDelete = true;
-                    nextUser();
+async function listGroup(data, done, decoded) {
+    if (decoded.whoami === 'main-service') {
+        let conditions = data.idCompany ? {idCompany: data.idCompany} : {};
+        let user = await Model.User.findOne({where: {username: decoded.username}});
+        Model.Group.findAll({
+            include: [{model: Model.User}, {model: Model.SharedProject}],
+            where: conditions
+        }).then(groups => {
+            let response = [];
+            async.each(groups, function (group, nextGroup) {
+                group = group.toJSON();
+                group.canDelete = false;
+                // group.canEdit = false;
+                let arr = [];
+                async.each(group.shared_projects, function (shared_project, next) {
+                    if (shared_project.idOwner === user.idUser) {
+                        arr.push(shared_project);
+                        next();
+                    } else {
+                        next();
+                    }
                 }, function () {
-                    group.shared_projects = arr;
-                    response.push(group);
-                    nextGroup();
+                    async.each(group.users, function (_user, nextUser) {
+                        if (_user.user_group_permission.permission === 1 && _user.idUser === user.idUser) group.canDelete = true;
+                        nextUser();
+                    }, function () {
+                        group.shared_projects = arr;
+                        response.push(group);
+                        nextGroup();
+                    });
+                });
+            }, function () {
+                response.sort((a, b) => {
+                    let nameA = a.name.toUpperCase();
+                    let nameB = b.name.toUpperCase();
+                    return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
+                });
+                done(responseJSON(200, "Successfull", response));
+            });
+        }).catch(err => {
+            done(responseJSON(512, err, err));
+        });
+    } else {
+        if (decoded.role === 0) {
+            Model.Group.findAll({include: {all: true}}).then((gs) => {
+                done(responseJSON(200, "Done", gs));
+            }).catch(err => {
+                done(responseJSON(512, err.message, err.message));
+            });
+        } else if (decoded.role === 1) {
+            Model.User.findOne({where: {username: decoded.username}}).then(user => {
+                Model.Group.findAll({where: {idCompany: user.idCompany}, include: {all: true}}).then(gs => {
+                    done(responseJSON(200, "Done", gs));
                 });
             });
-        }, function () {
-            response.sort((a, b) => {
-                let nameA = a.name.toUpperCase();
-                let nameB = b.name.toUpperCase();
-                return nameA == nameB ? 0 : nameA > nameB ? 1 : -1;
-            });
-            done(responseJSON(200, "Successfull", response));
-        });
-    }).catch(err => {
-        done(responseJSON(512, err, err));
-    });
+        } else {
+            done(responseJSON(512, "No permission", "No permission"));
+        }
+    }
 }
 
 function addUserToGroup(data, done) {

@@ -31,61 +31,83 @@ function infoUser(userInfo, done) {
 
 function editUser(userInfo, done) {
     // userInfo.password = md5(userInfo.password);
-    User.findById(userInfo.idUser).then(user => {
-        if (user) {
-            if (userInfo.newPassword) {
-                userInfo.password = md5(userInfo.newPassword);
+    if (userInfo.password && userInfo.password !== "") {
+        User.findById(userInfo.idUser).then(user => {
+            if (user) {
+                if (userInfo.password) {
+                    userInfo.password = md5(userInfo.password);
+                }
+                Object.assign(user, userInfo).save().then(rs => {
+                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
+                }).catch(err => {
+                    done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err));
+                });
+            } else {
+                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
             }
-            Object.assign(user, userInfo).save().then(rs => {
-                done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
-            }).catch(err => {
-                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err));
-            });
-        } else {
-            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
-        }
-    }).catch(err => {
-        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
-    })
+        }).catch(err => {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
+        })
+    } else {
+        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password can not be null", "Password can not be null"));
+    }
 }
 
-function listUser(userInfo, done) {
-    let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
-    User.findAll({where: conditions}).then(users => {
-        if (userInfo.project_name && userInfo.owner) {
-            let response = [];
-            let user = users.find(u => u.username === userInfo.owner);
-            SharedProject.findOne({
-                where: {project_name: userInfo.project_name, idOwner: user.idUser},
-                include: {model: models.Group}
-            }).then(sp => {
-                if (sp) {
-                    async.each(sp.groups, function (group, next) {
-                        models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
-                            async.each(g.users, function (u, nextU) {
-                                let find = response.find(_u => _u.username === u.username);
-                                if (!find) response.push(u);
-                                nextU();
-                            }, function () {
-                                next();
+function listUser(userInfo, done, decoded) {
+    if (decoded.whoami === 'main-service') {
+        let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
+        User.findAll({where: conditions}).then(users => {
+            if (userInfo.project_name && userInfo.owner) {
+                let response = [];
+                let user = users.find(u => u.username === userInfo.owner);
+                SharedProject.findOne({
+                    where: {project_name: userInfo.project_name, idOwner: user.idUser},
+                    include: {model: models.Group}
+                }).then(sp => {
+                    if (sp) {
+                        async.each(sp.groups, function (group, next) {
+                            models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
+                                async.each(g.users, function (u, nextU) {
+                                    let find = response.find(_u => _u.username === u.username);
+                                    if (!find) response.push(u);
+                                    nextU();
+                                }, function () {
+                                    next();
+                                });
                             });
+                        }, function () {
+                            done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                         });
-                    }, function () {
-                        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                    });
-                } else {
-                    let r = [];
-                    r.push(user);
-                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", r));
-                }
+                    } else {
+                        let r = [];
+                        r.push(user);
+                        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", r));
+                    }
+                });
+            } else {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
+            }
+        }).catch(err => {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
+        })
+    } else {
+        if (decoded.role === 0) {
+            User.findAll().then(us => {
+                done(ResponseJSON(200, "Done", us));
             });
-        } else {
-            done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", users));
+        } else if (decoded.role === 1) {
+            const Op = require('sequelize').Op;
+            User.findOne({where: {username: decoded.username}}).then(user => {
+                models.User.findAll({where: {idCompany: user.idCompany, role: {[Op.gte]: 1}}}).then(gs => {
+                    done(ResponseJSON(200, "Done", gs));
+                });
+            });
+        } else if (decoded.role === 2) {
+            User.findAll({where: {username: decoded.username}}).then(u => {
+                done(ResponseJSON(200, "Done", u));
+            });
         }
-    }).catch(err => {
-        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
-    })
-
+    }
 }
 
 function deleteUser(userInfo, done) {

@@ -7,7 +7,7 @@ router.use(bodyParser.json());
 router.post('/user/list', function (req, res) {
     model.listUser(req.body, function (status) {
         res.send(status);
-    });
+    }, req.decoded);
 });
 
 router.post('/user/new', function (req, res) {
