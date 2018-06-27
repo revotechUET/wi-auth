@@ -129,29 +129,29 @@ function deleteUser(userInfo, done) {
         if (user) {
             User.destroy({where: {idUser: user.idUser}, individualHooks: true}).then(rs => {
                 if (rs > 0) {
-                    let request = require('request');
-                    let dbName = 'wi_' + user.username.toLowerCase();
-                    let host = config.host + ":" + config.port;
-                    let options = {
-                        uri: host + '/database/update',
-                        method: 'DELETE',
-                        json: {
-                            "dbName": dbName
-                        }
-                    };
-                    request(
-                        options,
-                        function (error, response, body) {
-                            if (error) {
-                                return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
-                            }
-
-                            if (body.code === 200) {
-                                return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
-                            }
-                            done(body);
-                        });
-
+                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+                    // let request = require('request');
+                    // let dbName = 'wi_' + user.username.toLowerCase();
+                    // let host = config.host + ":" + config.port;
+                    // let options = {
+                    //     uri: host + '/database/update',
+                    //     method: 'DELETE',
+                    //     json: {
+                    //         "dbName": dbName
+                    //     }
+                    // };
+                    // request(
+                    //     options,
+                    //     function (error, response, body) {
+                    //         if (error) {
+                    //             return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
+                    //         }
+                    //
+                    //         if (body.code === 200) {
+                    //             return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+                    //         }
+                    //         done(body);
+                    //     });
                 }
             }).catch(err => {
                 console.log(err);
