@@ -53,6 +53,20 @@ function editUser(userInfo, done) {
     }
 }
 
+function changeUserStatus(userInfo, done) {
+    User.findById(userInfo.idUser).then(user => {
+        if (user) {
+            Object.assign(user, userInfo).save().then(u => {
+                done(ResponseJSON(200, "Done", u));
+            }).catch(err => {
+                done(ResponseJSON(512, err.message, err.message));
+            })
+        } else {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
+        }
+    })
+}
+
 function listUser(userInfo, done, decoded) {
     if (decoded.whoami === 'main-service') {
         let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
@@ -225,5 +239,6 @@ module.exports = {
     deleteUser: deleteUser,
     listUser: listUser,
     editUser: editUser,
-    getPermission: getPermission
+    getPermission: getPermission,
+    changeUserStatus: changeUserStatus
 };

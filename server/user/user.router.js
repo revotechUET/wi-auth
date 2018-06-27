@@ -34,6 +34,12 @@ router.post('/user/delete', function (req, res) {
     });
 });
 
+router.post('/user/change-status', function (req, res) {
+    model.changeUserStatus(req.body, function (status) {
+        res.send(status);
+    });
+});
+
 router.post('/user/dropdb', function (req, res) {
 
 });
