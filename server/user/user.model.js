@@ -30,27 +30,26 @@ function infoUser(userInfo, done) {
 }
 
 function editUser(userInfo, done) {
+    // console.log(userInfo);
     // userInfo.password = md5(userInfo.password);
-    if (userInfo.password && userInfo.password !== "") {
-        User.findById(userInfo.idUser).then(user => {
-            if (user) {
-                if (userInfo.password) {
-                    userInfo.password = md5(userInfo.password);
-                }
-                Object.assign(user, userInfo).save().then(rs => {
-                    done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
-                }).catch(err => {
-                    done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err));
-                });
-            } else {
-                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
+    if (userInfo.password === "") delete userInfo.password;
+    User.findById(userInfo.idUser).then(user => {
+        if (user) {
+            if (userInfo.password) {
+                userInfo.password = md5(userInfo.password);
             }
-        }).catch(err => {
-            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
-        })
-    } else {
-        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password can not be null", "Password can not be null"));
-    }
+            Object.assign(user, userInfo).save().then(rs => {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
+            }).catch(err => {
+                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err));
+            });
+        } else {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
+        }
+    }).catch(err => {
+        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
+    })
+
 }
 
 function changeUserStatus(userInfo, done) {
@@ -233,6 +232,21 @@ function getPermission(payload, done, username) {
     }
 }
 
+function forceLogOut(payload, done, username) {
+    models.User.findById(payload.idUser).then(user => {
+        if (user) {
+            models.RefreshToken.destroy({where: {idUser: user.idUser}}).then(() => {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Done", user));
+            }).catch(err => {
+                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
+            });
+
+        } else {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found", "No user found"));
+        }
+    });
+}
+
 module.exports = {
     createUser: createUser,
     infoUser: infoUser,
@@ -240,5 +254,6 @@ module.exports = {
     listUser: listUser,
     editUser: editUser,
     getPermission: getPermission,
-    changeUserStatus: changeUserStatus
+    changeUserStatus: changeUserStatus,
+    forceLogOut: forceLogOut
 };

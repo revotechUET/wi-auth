@@ -50,4 +50,10 @@ router.post('/user/get-permission', function (req, res) {
     }, req.decoded.username);
 });
 
+router.post('/user/force-log-out', function (req, res) {
+    model.forceLogOut(req.body, function (status) {
+        res.send(status)
+    }, req.decoded.username);
+});
+
 module.exports = router;
