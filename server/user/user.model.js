@@ -29,15 +29,66 @@ function infoUser(userInfo, done) {
     })
 }
 
+// function editUser(userInfo, done) {
+//     // console.log(userInfo);
+//     // userInfo.password = md5(userInfo.password);
+//     if (userInfo.password === "") delete userInfo.password;
+//     User.findById(userInfo.idUser).then(user => {
+//         if (user) {
+//             if (userInfo.password) {
+//                 userInfo.password = md5(userInfo.password);
+//             }
+//             Object.assign(user, userInfo).save().then(rs => {
+//                 done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
+//             }).catch(err => {
+//                 done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err));
+//             });
+//         } else {
+//             done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
+//         }
+//     }).catch(err => {
+//         done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
+//     })
+
+// }
+
 function editUser(userInfo, done) {
     // console.log(userInfo);
     // userInfo.password = md5(userInfo.password);
     if (userInfo.password === "") delete userInfo.password;
-    User.findById(userInfo.idUser).then(user => {
+    User.findById(userInfo.idUser).then(async user => {
         if (user) {
             if (userInfo.password) {
                 userInfo.password = md5(userInfo.password);
             }
+
+            if (userInfo.idCompany) {
+                //remove all group allow in that user
+                try {
+                    const rs = await models.UserGroupPermission.destroy({
+                        where: {
+                            idUser: userInfo.idUser
+                        }
+                    })
+                } catch (err) {
+                    return done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "err", err.message));
+                }
+            }
+
+            if (userInfo.idGroup) {
+                try {
+                    const group = await models.Group.findById(userInfo.idGroup);
+                    if (!group) {
+                        return done(responseJSON(512, "No group found by id"));
+                    }
+
+                    await group.addUser(userInfo.idUser, {through: {permission: 2}});
+                } catch (err) {
+                    return done(responseJSON(512, err, err));
+                }
+            }
+
+
             Object.assign(user, userInfo).save().then(rs => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
             }).catch(err => {
@@ -68,18 +119,18 @@ function changeUserStatus(userInfo, done) {
 
 function listUser(userInfo, done, decoded) {
     if (decoded.whoami === 'main-service') {
-        let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
-        User.findAll({where: conditions}).then(users => {
+        let conditions = userInfo.idCompany ? { idCompany: userInfo.idCompany } : {};
+        User.findAll({ where: conditions }).then(users => {
             if (userInfo.project_name && userInfo.owner) {
                 let response = [];
                 let user = users.find(u => u.username === userInfo.owner);
                 SharedProject.findOne({
-                    where: {project_name: userInfo.project_name, idOwner: user.idUser},
-                    include: {model: models.Group}
+                    where: { project_name: userInfo.project_name, idOwner: user.idUser },
+                    include: { model: models.Group }
                 }).then(sp => {
                     if (sp) {
                         async.each(sp.groups, function (group, next) {
-                            models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
+                            models.Group.findById(group.idGroup, { include: { model: models.User } }).then(g => {
                                 async.each(g.users, function (u, nextU) {
                                     let find = response.find(_u => _u.username === u.username);
                                     if (!find) response.push(u);
@@ -110,13 +161,13 @@ function listUser(userInfo, done, decoded) {
             });
         } else if (decoded.role === 1) {
             const Op = require('sequelize').Op;
-            User.findOne({where: {username: decoded.username}}).then(user => {
-                models.User.findAll({where: {idCompany: user.idCompany, role: {[Op.gte]: 1}}}).then(gs => {
+            User.findOne({ where: { username: decoded.username } }).then(user => {
+                models.User.findAll({ where: { idCompany: user.idCompany, role: { [Op.gte]: 1 } } }).then(gs => {
                     done(ResponseJSON(200, "Done", gs));
                 });
             });
         } else if (decoded.role === 2) {
-            User.findAll({where: {username: decoded.username}}).then(u => {
+            User.findAll({ where: { username: decoded.username } }).then(u => {
                 done(ResponseJSON(200, "Done", u));
             });
         }
@@ -126,7 +177,7 @@ function listUser(userInfo, done, decoded) {
 function deleteUser(userInfo, done) {
     User.findById(userInfo.idUser).then(user => {
         if (user) {
-            User.destroy({where: {idUser: user.idUser}, individualHooks: true}).then(rs => {
+            User.destroy({ where: { idUser: user.idUser }, individualHooks: true }).then(rs => {
                 if (rs > 0) {
                     done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
                     // let request = require('request');
@@ -200,7 +251,7 @@ function getPermission(payload, done, username) {
         done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Need projectname"));
     } else {
         User.findOne({
-            where: {username: _user},
+            where: { username: _user },
             include: {
                 model: models.Group,
             }
@@ -209,7 +260,7 @@ function getPermission(payload, done, username) {
                 models.Group.findById(group.idGroup, {
                     include: {
                         model: models.SharedProject,
-                        where: {project_name: payload.project_name}
+                        where: { project_name: payload.project_name }
                     }
                 }).then(g => {
                     if (g) {
@@ -235,7 +286,7 @@ function getPermission(payload, done, username) {
 function forceLogOut(payload, done, username) {
     models.User.findById(payload.idUser).then(user => {
         if (user) {
-            models.RefreshToken.destroy({where: {idUser: user.idUser}}).then(() => {
+            models.RefreshToken.destroy({ where: { idUser: user.idUser } }).then(() => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", user));
             }).catch(err => {
                 done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
