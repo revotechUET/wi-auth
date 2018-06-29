@@ -62,7 +62,7 @@ function editUser(userInfo, done) {
                 userInfo.password = md5(userInfo.password);
             }
 
-            if (userInfo.idCompany) {
+            if (userInfo.idCompany !== user.idCompany) {
                 //remove all group allow in that user
                 try {
                     const rs = await models.UserGroupPermission.destroy({
