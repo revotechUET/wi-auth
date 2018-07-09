@@ -3,9 +3,9 @@ let responseJSON = require('../response');
 let async = require('async');
 
 async function createNewGroup(data, done, username) {
-    let user = await Model.User.findOne({where: {username: username}});
+    let user = await Model.User.findOne({ where: { username: username } });
     Model.Group.create(data).then(group => {
-        group.addUser(user, {through: {permission: 1}});
+        group.addUser(user, { through: { permission: 1 } });
         done(responseJSON(200, "Successfull", group));
     }).catch(err => {
         done(responseJSON(512, err, err));
@@ -14,10 +14,10 @@ async function createNewGroup(data, done, username) {
 
 async function listGroup(data, done, decoded) {
     if (decoded.whoami === 'main-service') {
-        let conditions = data.idCompany ? {idCompany: data.idCompany} : {};
-        let user = await Model.User.findOne({where: {username: decoded.username}});
+        let conditions = data.idCompany ? { idCompany: data.idCompany } : {};
+        let user = await Model.User.findOne({ where: { username: decoded.username } });
         Model.Group.findAll({
-            include: [{model: Model.User}, {model: Model.SharedProject}],
+            include: [{ model: Model.User }, { model: Model.SharedProject }],
             where: conditions
         }).then(groups => {
             let response = [];
@@ -56,14 +56,14 @@ async function listGroup(data, done, decoded) {
         });
     } else {
         if (decoded.role === 0) {
-            Model.Group.findAll({include: {all: true}}).then((gs) => {
+            Model.Group.findAll({ include: { all: true } }).then((gs) => {
                 done(responseJSON(200, "Done", gs));
             }).catch(err => {
                 done(responseJSON(512, err.message, err.message));
             });
         } else if (decoded.role === 1) {
-            Model.User.findOne({where: {username: decoded.username}}).then(user => {
-                Model.Group.findAll({where: {idCompany: user.idCompany}, include: {all: true}}).then(gs => {
+            Model.User.findOne({ where: { username: decoded.username } }).then(user => {
+                Model.Group.findAll({ where: { idCompany: user.idCompany }, include: { all: true } }).then(gs => {
                     done(responseJSON(200, "Done", gs));
                 });
             });
@@ -76,7 +76,7 @@ async function listGroup(data, done, decoded) {
 function addUserToGroup(data, done) {
     Model.Group.findById(data.idGroup).then(group => {
         if (group) {
-            group.addUser(data.idUser, {through: {permission: 2}});
+            group.addUser(data.idUser, { through: { permission: 2 } });
             done(responseJSON(200, "Successfull", data));
         } else {
             done(responseJSON(512, "No group found by id"));
@@ -101,7 +101,7 @@ function deleteGroup(data, done) {
 }
 
 function removeUser(data, done) {
-    Model.Group.findById(data.idGroup, {include: {model: Model.User, where: {idUser: data.idUser}}}).then(group => {
+    Model.Group.findById(data.idGroup, { include: { model: Model.User, where: { idUser: data.idUser } } }).then(group => {
         if (group) {
             if (group.users[0].user_group_permission.permission === 1) {
                 done(responseJSON(200, "CANT_REMOVE_OWNER", "CANT_REMOVE_OWNER"));
@@ -120,7 +120,7 @@ function getProjectPermission(data, done) {
     Model.Group.findById(data.idGroup, {
         include: {
             model: Model.SharedProject,
-            where: {project_name: data.project_name}
+            where: { project_name: data.project_name }
         }
     }).then(group => {
         if (!group) {
@@ -139,16 +139,38 @@ function updateProjectPermission(data, done) {
     Model.Group.findById(data.idGroup, {
         include: {
             model: Model.SharedProject,
-            where: {project_name: data.project_name}
+            where: { project_name: data.project_name }
         }
     }).then(group => {
         if (group.shared_projects.length !== 0) {
-            group.setShared_projects([group.shared_projects[0].idSharedProject], {through: {permission: data.permission}});
+            group.setShared_projects([group.shared_projects[0].idSharedProject], { through: { permission: data.permission } });
             done(responseJSON(200, "Successfull", group));
         } else {
             done(responseJSON(200, "Successfull", {}));
         }
     })
+}
+
+async function addUserToGroups(data, done) {
+    try {
+
+        const listGroupPromise = data
+            .idGroups
+            .map(id => Model.Group.findById(id));
+
+        const groups = await Promise.all(listGroupPromise);
+
+        groups.forEach(group => {
+            if(group) group.addUser(data.idUser, { through: { permission: 2 } });
+        })
+
+        done(responseJSON(200, "Successfull", data));
+
+
+
+    } catch (err) { 
+        done(responseJSON(512, err, err));
+    }
 }
 
 module.exports = {
@@ -158,5 +180,6 @@ module.exports = {
     addUserToGroup: addUserToGroup,
     removeUser: removeUser,
     getProjectPermission: getProjectPermission,
-    updateProjectPermission: updateProjectPermission
+    updateProjectPermission: updateProjectPermission,
+    addUserToGroups
 };
