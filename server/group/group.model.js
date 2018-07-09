@@ -153,15 +153,32 @@ function updateProjectPermission(data, done) {
 
 async function addUserToGroups(data, done) {
     try {
-
         const listGroupPromise = data
             .idGroups
-            .map(id => Model.Group.findById(id));
+            .map(group => {
+                
+                const {id} = group;
+                if(group.type === 'remove') {
+                    return Model.Group.findById(id, { include: { model: Model.User, where: { idUser: data.idUser } } });
+                } else {
+                    return Model.Group.findById(id);
+                }
+            });
 
         const groups = await Promise.all(listGroupPromise);
 
         groups.forEach(group => {
-            if(group) group.addUser(data.idUser, { through: { permission: 2 } });
+
+            if(group) {
+                if(group.users && group.users.length && group.users[0].user_group_permission.permission >= 2) {
+                    console.log('remove');
+                    group.removeUser(data.idUser);
+                } else {
+                    console.log('add');
+                    group.addUser(data.idUser, { through: { permission: 2 } });
+                }
+            }
+            
         })
 
         done(responseJSON(200, "Successfull", data));
@@ -169,6 +186,7 @@ async function addUserToGroups(data, done) {
 
 
     } catch (err) { 
+        console.log(err);
         done(responseJSON(512, err, err));
     }
 }

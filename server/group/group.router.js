@@ -39,7 +39,7 @@ router.post('/group/add-user-to-groups', function(req, res){
     groupModel.addUserToGroups(req.body, function(data) {
         res.send(data);
     })
-})
+});
 
 router.post("/group/remove-user", function (req, res) {
     groupModel.removeUser(req.body, function (data) {
