@@ -243,7 +243,7 @@ function dropDb(payload, done) {
 
 function getPermission(payload, done, username) {
     let _user = payload.username || username;
-    let permission = require('../utils/default-permission');
+    let permission = require('../utils/default-permission---------');
     for (let key in permission) {
         permission[key] = false;
     }

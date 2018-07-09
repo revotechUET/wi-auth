@@ -1,6 +1,7 @@
 let ResponseJSON = require('../response');
 let Model = require('../models-master');
 let asyncEach = require('async/each');
+let fs = require('fs');
 
 function createNewSharedProject(data, done, username) {
     Model.User.findOne({where: {username: username}}).then((user => {
@@ -18,9 +19,9 @@ function createNewSharedProject(data, done, username) {
 function addToGroup(data, done) {
     if (data.type === "add") {
         Model.SharedProject.findById(data.idSharedProject).then(rs => {
-            let defaultPerm = require('../utils/default-permission');
+            let defaultPerm = require('../utils/default-permission.json');
             rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
-            // console.log(defaultPerm);
+            console.log(defaultPerm);
             done(ResponseJSON(200, 'Successfull', data));
         }).catch(err => {
             done(ResponseJSON(512, err, err));

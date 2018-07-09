@@ -57,6 +57,10 @@ models.forEach(function (model) {
     });
     m.Group.belongsToMany(m.SharedProject, {
         through: 'shared_project_group',
+        foreignKey: 'idSharedProject'
+    });
+    m.Group.belongsToMany(m.SharedProject, {
+        through: 'shared_project_group',
         foreignKey: 'idGroup'
     });
     ///user.addGroup(group, {through: {permission: 5});
