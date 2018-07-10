@@ -136,19 +136,49 @@ function getProjectPermission(data, done) {
 }
 
 function updateProjectPermission(data, done) {
-    Model.Group.findById(data.idGroup, {
-        include: {
-            model: Model.SharedProject,
-            where: {project_name: data.project_name}
-        }
-    }).then(group => {
-        if (group.shared_projects.length !== 0) {
-            group.setShared_projects([group.shared_projects[0].idSharedProject], {through: {permission: data.permission}});
-            done(responseJSON(200, "Successfull", group));
+    Model.User.findOne({where: {username: data.username}}).then(user => {
+        if (user) {
+            Model.SharedProject.findOne({
+                where: {
+                    project_name: data.project_name,
+                    idOwner: user.idUser
+                }
+            }).then(shared_project => {
+                if (shared_project) {
+                    Model.SharedProjectGroup.findOne({
+                        where: {
+                            idGroup: data.idGroup,
+                            idSharedProject: shared_project.idSharedProject
+                        }
+                    }).then(perm => {
+                        if (perm) {
+                            let newPerm = perm.toJSON();
+                            newPerm.permission = data.permission;
+                            Object.assign(perm, newPerm).save().then((p) => {
+                                done(responseJSON(200, "Successful", p))
+                            }).catch(err => {
+                                done(responseJSON(512, err.message, err));
+                            });
+                        } else {
+                            Model.SharedProjectGroup.create({
+                                idGroup: data.idGroup,
+                                idSharedProject: shared_project.idSharedProject,
+                                permission: data.permission
+                            }).then(p => {
+                                done(responseJSON(200, "Successful create new perm", p));
+                            }).catch(err => {
+                                done(responseJSON(512, err, {}));
+                            });
+                        }
+                    })
+                } else {
+                    done(responseJSON(200, "No shared project found", {}));
+                }
+            });
         } else {
-            done(responseJSON(200, "Successfull", {}));
+            done(responseJSON(200, "No user found", {}));
         }
-    })
+    });
 }
 
 module.exports = {
