@@ -4,8 +4,8 @@
     // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
     "host": "localhost",
     "port": 3306,
-    "user": "wi_auth",
-    "password": "@Abc123456",
+    "user": "root",
+    "password": "mypassword",
     "logging": false,
     //Logging all database query if is set "true"
     "storage": "/tmp/wi_backend.sqlite",

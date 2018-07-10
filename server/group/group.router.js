@@ -28,6 +28,19 @@ router.post("/group/add-user", function (req, res) {
     });
 });
 
+// groupModel.addUserToGroup({
+//     idUser: 1,
+//     idGroup: 2
+// }, function (data) {
+//     console.log('suc')
+// });
+
+router.post('/group/add-user-to-groups', function(req, res){
+    groupModel.addUserToGroups(req.body, function(data) {
+        res.send(data);
+    })
+});
+
 router.post("/group/remove-user", function (req, res) {
     groupModel.removeUser(req.body, function (data) {
         res.send(data);
