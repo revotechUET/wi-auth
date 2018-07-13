@@ -40,7 +40,8 @@ models.forEach(function (model) {
     m.Company.hasMany(m.Group, {
         foreignKey: {name: 'idCompany', allowNull: false, unique: "name-idCompany"},
         onDelete: 'CASCADE'
-    });
+	});
+	m.Group.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}});
     m.Company.hasMany(m.User, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
     m.User.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
     m.User.belongsToMany(m.Group, {

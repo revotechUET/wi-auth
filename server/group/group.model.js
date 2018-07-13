@@ -17,7 +17,7 @@ async function listGroup(data, done, decoded) {
 		let user = await Model.User.findOne({ where: { username: decoded.username } });
 		let conditions = user.role !== 3 ? data.idCompany ? { idCompany: data.idCompany } : {} : null;
 		Model.Group.findAll({
-			include: [{ model: Model.User }, { model: Model.SharedProject }],
+			include: [{ model: Model.User }, { model: Model.SharedProject }, {model: Model.Company}],
 			where: conditions
 		}).then(groups => {
 			let response = [];
