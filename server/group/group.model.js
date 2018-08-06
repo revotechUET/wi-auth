@@ -221,6 +221,24 @@ async function addUserToGroups(data, done) {
 	}
 }
 
+async function addUsersToGroup(data, done) {
+	try {
+		const group = await Model.Group.findById(data.idGroup);
+
+		data.idUsers.forEach(id => {
+			group.addUser(id)
+		})
+
+		done(responseJSON(200, "Successfull", data));
+
+
+
+	} catch (err) {
+		console.log(err);
+		done(responseJSON(512, err, err));
+	}
+}
+
 module.exports = {
 	createNewGroup: createNewGroup,
 	listGroup: listGroup,
@@ -229,5 +247,6 @@ module.exports = {
 	removeUser: removeUser,
 	getProjectPermission: getProjectPermission,
 	updateProjectPermission: updateProjectPermission,
-	addUserToGroups
+	addUserToGroups,
+	addUsersToGroup
 };
