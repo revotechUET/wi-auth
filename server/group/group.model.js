@@ -15,6 +15,9 @@ async function createNewGroup(data, done, username) {
 async function listGroup(data, done, decoded) {
     if (decoded.whoami === 'main-service') {
         if (data.singleUser) {
+            if (/^su_/.test(data.singleUser)) {
+                data.singleUser = data.singleUser.substring(data.singleUser.indexOf('su_') + 3);
+            }
             let user = await Model.User.findOne({where: {username: data.singleUser}, include: Model.Group});
             done(responseJSON(200, 'Done', user.groups));
         } else {
@@ -205,31 +208,30 @@ async function addUserToGroups(data, done) {
 }
 
 async function addUsersToGroup(data, done) {
-	try {
-		const group = await Model.Group.findById(data.idGroup);
+    try {
+        const group = await Model.Group.findById(data.idGroup);
 
-		data.idUsers.forEach(id => {
-			group.addUser(id)
-		})
+        data.idUsers.forEach(id => {
+            group.addUser(id)
+        })
 
-		done(responseJSON(200, "Successfull", data));
+        done(responseJSON(200, "Successfull", data));
 
 
-
-	} catch (err) {
-		console.log(err);
-		done(responseJSON(512, err, err));
-	}
+    } catch (err) {
+        console.log(err);
+        done(responseJSON(512, err, err));
+    }
 }
 
 module.exports = {
-	createNewGroup: createNewGroup,
-	listGroup: listGroup,
-	deleteGroup: deleteGroup,
-	addUserToGroup: addUserToGroup,
-	removeUser: removeUser,
-	getProjectPermission: getProjectPermission,
-	updateProjectPermission: updateProjectPermission,
-	addUserToGroups,
-	addUsersToGroup
+    createNewGroup: createNewGroup,
+    listGroup: listGroup,
+    deleteGroup: deleteGroup,
+    addUserToGroup: addUserToGroup,
+    removeUser: removeUser,
+    getProjectPermission: getProjectPermission,
+    updateProjectPermission: updateProjectPermission,
+    addUserToGroups,
+    addUsersToGroup
 };
