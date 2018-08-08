@@ -57,4 +57,10 @@ router.post('/group/update-project-permission', function (req, res) {
     })
 });
 
+router.post('/group/add-users-to-group', function(req, res) {
+    groupModel.addUsersToGroup(req.body, function(data) {
+        res.send(data)
+    })
+})
+
 module.exports = router;
