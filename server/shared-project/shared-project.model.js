@@ -5,7 +5,8 @@ let fs = require('fs');
 let md5 = require('md5');
 
 function createNewSharedProject(data, done, username) {
-    let conditions = username ? {username: username} : {username: data.username};
+    // let conditions = username ? {username: username} : {username: data.username};
+    let conditions = data.username ? {username: data.username} : {username: username};
     Model.User.findOne({where: conditions}).then((user => {
         data.shareKey = md5(data.project_name + user.idUser);
         Model.SharedProject.findOrCreate({
@@ -41,7 +42,7 @@ function addToGroup(data, done) {
     if (data.type === "add") {
         if (data.shareKey) {
             Model.SharedProject.findOne({where: {shareKey: data.shareKey}}).then(rs => {
-                if(rs){
+                if (rs) {
                     let defaultPerm = require('../utils/default-permission.json');
                     rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
                     done(ResponseJSON(200, 'Successful', data));
