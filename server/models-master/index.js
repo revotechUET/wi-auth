@@ -37,11 +37,12 @@ models.forEach(function (model) {
 (function (m) {
     m.User.hasMany(m.RefreshToken, {foreignKey: {name: 'idUser', allowNull: false}, onDelete: 'CASCADE'});
     m.User.hasMany(m.SharedProject, {foreignKey: {name: 'idOwner', allowNull: false}, onDelete: 'CASCADE'});
+    m.SharedProject.belongsTo(m.User, {foreignKey: {name: 'idOwner', allowNull: false}, onDelete: 'CASCADE'});
     m.Company.hasMany(m.Group, {
         foreignKey: {name: 'idCompany', allowNull: false, unique: "name-idCompany"},
         onDelete: 'CASCADE'
-	});
-	m.Group.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}});
+    });
+    m.Group.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}});
     m.Company.hasMany(m.User, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
     m.User.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
     m.User.belongsToMany(m.Group, {

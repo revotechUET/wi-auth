@@ -2,9 +2,12 @@ let ResponseJSON = require('../response');
 let Model = require('../models-master');
 let asyncEach = require('async/each');
 let fs = require('fs');
+let md5 = require('md5');
 
 function createNewSharedProject(data, done, username) {
-    Model.User.findOne({where: {username: username}}).then((user => {
+    let conditions = username ? {username: username} : {username: data.username};
+    Model.User.findOne({where: conditions}).then((user => {
+        data.shareKey = md5(data.project_name + user.idUser);
         Model.SharedProject.findOrCreate({
             where: {project_name: data.name, idOwner: user.idUser},
             defaults: data
@@ -16,16 +19,48 @@ function createNewSharedProject(data, done, username) {
     }));
 }
 
+function removeSharedProject(data, done) {
+    Model.User.findOne({where: {username: data.createdBy}}).then(user => {
+        if (user) {
+            Model.SharedProject.findOne({where: {idOwner: user.idUser, project_name: data.name}}).then(p => {
+                if (p) {
+                    p.destroy().then(() => {
+                        done(ResponseJSON(200, "Done", p));
+                    })
+                } else {
+                    done(ResponseJSON(512, "No shared project found"));
+                }
+            });
+        } else {
+            done(ResponseJSON(512, "No user found"));
+        }
+    });
+}
+
 function addToGroup(data, done) {
     if (data.type === "add") {
-        Model.SharedProject.findById(data.idSharedProject).then(rs => {
-            let defaultPerm = require('../utils/default-permission.json');
-            rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
-            // console.log(defaultPerm);
-            done(ResponseJSON(200, 'Successfull', data));
-        }).catch(err => {
-            done(ResponseJSON(512, err, err));
-        });
+        if (data.shareKey) {
+            Model.SharedProject.findOne({where: {shareKey: data.shareKey}}).then(rs => {
+                if(rs){
+                    let defaultPerm = require('../utils/default-permission.json');
+                    rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
+                    done(ResponseJSON(200, 'Successful', data));
+                } else {
+                    done(ResponseJSON(512, "Share key isn't correct"));
+                }
+
+            }).catch(err => {
+                done(ResponseJSON(512, err, err));
+            });
+        } else {
+            Model.SharedProject.findById(data.idSharedProject).then(rs => {
+                let defaultPerm = require('../utils/default-permission.json');
+                rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
+                done(ResponseJSON(200, 'Successful', data));
+            }).catch(err => {
+                done(ResponseJSON(512, err, err));
+            });
+        }
     } else if (data.type === "remove") {
         Model.SharedProject.findById(data.idSharedProject).then(rs => {
             rs.removeGroup(data.idGroup);
@@ -38,6 +73,12 @@ function addToGroup(data, done) {
     }
 
 
+}
+
+function getAllSharedProject(data, done) {
+    Model.SharedProject.findAll({include: Model.User}).then(sps => {
+        done(ResponseJSON(200, "Done", sps));
+    });
 }
 
 function getSharedProjectList(data, done) {
@@ -54,6 +95,7 @@ function getSharedProjectList(data, done) {
                         listPrj.push({
                             owner: u.username,
                             name: sharedProject.project_name,
+                            shareKey: sharedProject.shareKey,
                             group: group.name
                         });
                     }
@@ -71,5 +113,7 @@ function getSharedProjectList(data, done) {
 module.exports = {
     createNewSharedProject: createNewSharedProject,
     getSharedProjectList: getSharedProjectList,
-    addToGroup: addToGroup
+    addToGroup: addToGroup,
+    removeSharedProject: removeSharedProject,
+    getAllSharedProject: getAllSharedProject
 };

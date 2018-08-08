@@ -9,6 +9,18 @@ router.post('/shared-project/new', function (req, res) {
     }, req.decoded.username);
 });
 
+router.post('/shared-project/all', function (req, res) {
+    shareProjectModel.getAllSharedProject(req.body, function (status) {
+        res.send(status);
+    }, req.decoded.username);
+});
+
+router.post('/shared-project/remove', function (req, res) {
+    shareProjectModel.removeSharedProject(req.body, function (status) {
+        res.send(status);
+    }, req.decoded.username);
+});
+
 router.post('/shared-project/list', function (req, res) {
     shareProjectModel.getSharedProjectList(req.body, function (status) {
         res.send(status);

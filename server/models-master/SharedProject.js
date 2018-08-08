@@ -9,6 +9,10 @@ module.exports = function (sequelize, DataTypes) {
         project_name: {
             type: DataTypes.STRING(50),
             allowNull: false
+        },
+        shareKey: {
+            type: DataTypes.STRING(40),
+            allowNull: true
         }
     });
 };
