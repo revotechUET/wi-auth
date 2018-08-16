@@ -77,7 +77,12 @@ function addToGroup(data, done) {
 }
 
 function getAllSharedProject(data, done) {
-    Model.SharedProject.findAll({include: Model.User}).then(sps => {
+    Model.SharedProject.findAll({
+        include: [
+            {model: Model.User},
+            {model: Model.Group, include: Model.Company}
+        ]
+    }).then(sps => {
         done(ResponseJSON(200, "Done", sps));
     });
 }
