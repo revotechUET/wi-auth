@@ -44,8 +44,31 @@ function addToGroup(data, done) {
             Model.SharedProject.findOne({where: {shareKey: data.shareKey}}).then(rs => {
                 if (rs) {
                     let defaultPerm = require('../utils/default-permission.json');
-                    rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
-                    done(ResponseJSON(200, 'Successful', data));
+                    if (data.idGroup === 0) {
+                        Model.Group.findOrCreate({
+                            where: {
+                                name: data.company + "-" + data.username,
+                                idCompany: data.idCompany
+                            }, defaults: {
+                                name: data.company + "-" + data.username,
+                                idCompany: data.idCompany
+                            }
+                        }).then(gr => {
+                            Model.User.findOne({
+                                where: {
+                                    idCompany: data.idCompany,
+                                    username: data.username
+                                }
+                            }).then(user => {
+                                gr[0].addUser(user.idUser);
+                                rs.addGroup(gr[0].idGroup, {through: {permission: defaultPerm}});
+                                done(ResponseJSON(200, "Done"));
+                            });
+                        });
+                    } else {
+                        rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
+                        done(ResponseJSON(200, 'Successful', data));
+                    }
                 } else {
                     done(ResponseJSON(512, "Share key isn't correct"));
                 }

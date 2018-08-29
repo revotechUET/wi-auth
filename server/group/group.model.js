@@ -19,7 +19,9 @@ async function listGroup(data, done, decoded) {
                 data.singleUser = data.singleUser.substring(data.singleUser.indexOf('su_') + 3);
             }
             let user = await Model.User.findOne({where: {username: data.singleUser}, include: Model.Group});
-            done(responseJSON(200, 'Done', user.groups));
+            let response = user.groups;
+            response.push({idGroup: 0, name: ">> Only Me <<"});
+            done(responseJSON(200, 'Done', response));
         } else {
             let user = await Model.User.findOne({where: {username: decoded.username}});
             Model.Group.findAll({
