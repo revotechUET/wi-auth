@@ -299,18 +299,20 @@ function forceLogOut(payload, done, username) {
 }
 
 async function changePassword(payload, username) {
-    const {oldPass, newPass} = payload;
+    const {oldPassword, newPassword} = payload;
 
     try {
         const user = await models.User.findOne({where: {username}});
 
-        if (!user) throw new Error('Incorrect username or password!');
-        if (md5(oldPass) !== user.password) throw new Error('Incorrect username or password!');
+        if (!user) throw new Error('Incorrect password!');
+        if (md5(oldPassword) !== user.password) throw new Error('Incorrect password!');
 
-        user.password = md5(newPass);
+        user.password = md5(newPassword);
         const savedUser = await user.save();
+        const userObj = {...savedUser.toJSON()};
+        delete userObj.password;
 
-        return ResponseJSON(ErrorCodes.SUCCESS, "Successful", savedUser.toJSON());
+        return ResponseJSON(ErrorCodes.SUCCESS, "Successful", userObj);
     } catch(err) {
         return ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message);
     }
