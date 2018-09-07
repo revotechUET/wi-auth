@@ -56,4 +56,9 @@ router.post('/user/force-log-out', function (req, res) {
     }, req.decoded.username);
 });
 
+router.post('/user/change-password', async function (req, res) {
+    const status = await model.changePassword(req.body, req.decoded.username);
+    return res.send(status);
+});
+
 module.exports = router;

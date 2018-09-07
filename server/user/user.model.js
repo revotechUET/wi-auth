@@ -298,6 +298,24 @@ function forceLogOut(payload, done, username) {
     });
 }
 
+async function changePassword(payload, username) {
+    const {oldPass, newPass} = payload;
+
+    try {
+        const user = await models.User.findOne({where: {username}});
+
+        if (!user) throw new Error('Incorrect username or password!');
+        if (md5(oldPass) !== user.password) throw new Error('Incorrect username or password!');
+
+        user.password = md5(newPass);
+        const savedUser = await user.save();
+
+        return ResponseJSON(ErrorCodes.SUCCESS, "Successful", savedUser.toJSON());
+    } catch(err) {
+        return ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message);
+    }
+}
+
 module.exports = {
     createUser: createUser,
     infoUser: infoUser,
@@ -306,5 +324,6 @@ module.exports = {
     editUser: editUser,
     getPermission: getPermission,
     changeUserStatus: changeUserStatus,
-    forceLogOut: forceLogOut
+    forceLogOut: forceLogOut,
+    changePassword
 };
