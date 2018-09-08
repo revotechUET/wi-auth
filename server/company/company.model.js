@@ -57,10 +57,11 @@ function listCompany(payload, callback) {
             comp = comp.toJSON();
             models.User.findAndCountAll({where: {idCompany: comp.idCompany}}).then(users => {
                 comp.users = users;
+                resp.push(comp);
                 next();
             })
         }, function () {
-            callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", comps));
+            callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", resp));
         })
     });
 }
