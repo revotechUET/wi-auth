@@ -18,6 +18,11 @@ module.exports = function (sequelize, DataTypes) {
         location: {
             type: DataTypes.STRING(250),
             allowNull: true
+        },
+        licences: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 10
         }
     });
 };
