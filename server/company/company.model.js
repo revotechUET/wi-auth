@@ -1,11 +1,12 @@
 let models = require('../models-master/index');
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
+let async = require('async');
 
 function createCompany(payload, callback) {
     models.Company.create(payload).then(com => {
         callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", com));
-    }).catch(err=>{
+    }).catch(err => {
         console.log(err);
         callback(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
     });
@@ -51,7 +52,14 @@ function infoCompany(payload, callback) {
 
 function listCompany(payload, callback) {
     models.Company.findAll().then(comps => {
-        callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", comps));
+        async.each(comps, function (comp, next) {
+            models.User.findAndCountAll({where: {idCompany: comp.idCompany}}).then(users => {
+                comp.users = users;
+                next();
+            })
+        }, function () {
+            callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", comps));
+        })
     });
 }
 
