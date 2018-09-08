@@ -19,7 +19,7 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING(250),
             allowNull: true
         },
-        licences: {
+        licenses: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 10
