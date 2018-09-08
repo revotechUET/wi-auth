@@ -111,7 +111,7 @@ router.post('/register', function (req, res) {
             username: req.body.username,
             password: req.body.password,
             fullname: req.body.fullname,
-            status: "Active",
+            status: "Inactive",
             email: req.body.email,
             idCompany: req.body.idCompany
         }).then(function (result) {
