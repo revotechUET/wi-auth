@@ -51,8 +51,10 @@ function infoCompany(payload, callback) {
 }
 
 function listCompany(payload, callback) {
+    let resp = [];
     models.Company.findAll().then(comps => {
         async.each(comps, function (comp, next) {
+            comp = comp.toJSON();
             models.User.findAndCountAll({where: {idCompany: comp.idCompany}}).then(users => {
                 comp.users = users;
                 next();
