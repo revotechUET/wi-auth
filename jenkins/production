@@ -6,19 +6,19 @@ pipeline {
     stages {
         stage("Rsync dev") {
             steps {
-                sh 'rsync --delete -azvv ./* -e ssh i2g-amdin-api-production:/home/ubuntu/wi-auth'
+                sh 'rsync --delete -azvv ./* -e ssh i2g-admin-api-production:/home/ubuntu/wi-auth'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'ssh i2g-amdin-api-production "cd /home/ubuntu/wi-auth && npm install"'
+                sh 'ssh i2g-admin-api-production "cd /home/ubuntu/wi-auth && npm install"'
             }
         }
 
         stage('Deploy to dev') {
             steps {
-                sh 'ssh i2g-amdin-api-production "cd /home/ubuntu/wi-auth && pm2 restart pm2.config.js"'
+                sh 'ssh i2g-admin-api-production "cd /home/ubuntu/wi-auth && pm2 restart pm2.config.js"'
             }
         }
     }
