@@ -144,6 +144,9 @@ function changeUserStatus(userInfo, done) {
 }
 
 function listUser(userInfo, done, decoded) {
+    if(userInfo.owner && userInfo.owner.indexOf('su_') === 0){
+        userInfo.owner = userInfo.owner.substring(3);
+    }
     if (decoded.whoami === 'main-service') {
         let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
         User.findAll({where: conditions}).then(users => {
