@@ -10,6 +10,7 @@ let config = require('config').backend_service;
 let async = require('async');
 
 function createUser(userInfo, done) {
+    userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
     userInfo.password = md5(userInfo.password);
     User.create(userInfo).then(user => {
         done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
