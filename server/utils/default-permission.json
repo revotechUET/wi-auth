@@ -65,7 +65,7 @@
   "image-track.delete": false,
   "object-track.get": true,
   "object-track.create": true,
-  "objecttrack.update": true,
+  "object-track.update": true,
   "object-track.delete": false,
   "zone-track.get": true,
   "zone-track.create": true,
