@@ -118,7 +118,7 @@ setInterval(function () {
     }).catch(err => {
         console.log(err);
     });
-}, 1000 * 60 * 60 * 12);
+}, 1000 * 60 * 60);
 module.exports = {
     createRefreshToken: createRefreshToken,
     checkRefreshToken: checkRefreshToken,
