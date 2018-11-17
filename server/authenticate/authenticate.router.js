@@ -28,7 +28,7 @@ router.post('/refresh-token', function (req, res) {
                             if (err) {
                                 res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Session expired!"));
                             } else {
-                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '24h'});
+                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '48h'});
                                 let response = {};
                                 response.token = accessToken;
                                 response.refresh_token = newRefreshToken;
