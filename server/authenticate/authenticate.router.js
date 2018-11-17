@@ -23,11 +23,11 @@ router.post('/refresh-token', function (req, res) {
                 } else {
                     refreshTokenModel.renewRefreshToken(result.refreshToken, function (newRefreshToken) {
                         jwt.verify(token, secretKey, function (err, decoded) {
-                            delete decoded.iat;
-                            delete decoded.exp;
                             if (err) {
                                 res.status(200).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Session expired!"));
                             } else {
+                                delete decoded.iat;
+                                delete decoded.exp;
                                 let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '48h'});
                                 let response = {};
                                 response.token = accessToken;
