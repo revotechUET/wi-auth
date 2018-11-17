@@ -75,7 +75,7 @@ let clearTokenByUser = function (idUser, callback) {
     }).catch(err => {
         callback(err, null);
     });
-}
+};
 setTimeout(function () {
     console.log("Start clean refresh token");
     RefreshToken.findAll().then(tokens => {
@@ -123,5 +123,6 @@ module.exports = {
     createRefreshToken: createRefreshToken,
     checkRefreshToken: checkRefreshToken,
     renewRefreshToken: renewRefreshToken,
-    destroyRefreshToken: destroyRefreshToken
-}
+    destroyRefreshToken: destroyRefreshToken,
+    clearTokenByUser: clearTokenByUser
+};
