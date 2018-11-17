@@ -87,13 +87,17 @@ router.post('/login', function (req, res) {
                             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                             let response = {};
                             response.token = token;
-                            refreshTokenModel.clearTokenByUser(user.idUser, function () {
-                                refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
-                                    response.refresh_token = refreshToken;
-                                    response.company = user.company;
-                                    return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                            if (req.body.whoami === 'main-service') {
+                                refreshTokenModel.clearTokenByUser(user.idUser, function () {
+                                    refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
+                                        response.refresh_token = refreshToken;
+                                        response.company = user.company;
+                                        return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                                    });
                                 });
-                            });
+                            } else {
+                                return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                            }
                         } else {
                             res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                         }
