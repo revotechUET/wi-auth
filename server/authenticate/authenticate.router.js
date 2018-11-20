@@ -52,10 +52,10 @@ router.post('/login', function (req, res) {
         User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
             .then(function (user) {
                 if (!user) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
+                    res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
                 } else {
                     if (user.status === "Inactive") {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     } else if (user.status === "Active") {
                         let data = {username: user.username, whoami: req.body.whoami, role: user.role};
                         let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
@@ -67,7 +67,7 @@ router.post('/login', function (req, res) {
                             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                         });
                     } else {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                     }
                 }
             });
@@ -75,13 +75,13 @@ router.post('/login', function (req, res) {
         User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
             .then(function (user) {
                 if (!user) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
+                    res.send(ResponseJSON(ErrorCodes.ERROR_USER_NOT_EXISTS, "User is not exists."));
                 } else {
                     if (user.password !== req.body.password) {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password is not correct."));
+                        res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Password is not correct."));
                     } else {
                         if (user.status === "Inactive") {
-                            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                            res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                         } else if (user.status === "Active") {
                             let data = {username: user.username, whoami: req.body.whoami, role: user.role};
                             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
@@ -99,7 +99,7 @@ router.post('/login', function (req, res) {
                                 return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                             }
                         } else {
-                            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                            res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation."));
                         }
                     }
                 }
