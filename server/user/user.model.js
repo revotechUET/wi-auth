@@ -106,13 +106,17 @@ function editUser(userInfo, done) {
 }
 
 function checkLicense(idCompany, cb) {
-    Company.findById(idCompany, {include: {model: User, where: {status: 'Active'}}}).then(company => {
-        let activeUsers = company.users.length;
-        if (company.licenses > activeUsers) {
-            cb(true);
-        } else {
-            cb(false);
-        }
+    console.log("Active user of compnay ", idCompany);
+    User.findAll({where: {idCompany: idCompany, status: "Active"}}).then(users => {
+        let activeUsers = users.length;
+        console.log("Total actived user ", activeUsers);
+        Company.findById(idCompany).then(company => {
+            if (company.licenses > activeUsers) {
+                cb(true);
+            } else {
+                cb(false);
+            }
+        });
     });
 }
 
@@ -145,7 +149,7 @@ function changeUserStatus(userInfo, done) {
 }
 
 function listUser(userInfo, done, decoded) {
-    if(userInfo.owner && userInfo.owner.indexOf('su_') === 0){
+    if (userInfo.owner && userInfo.owner.indexOf('su_') === 0) {
         userInfo.owner = userInfo.owner.substring(3);
     }
     if (decoded.whoami === 'main-service') {
