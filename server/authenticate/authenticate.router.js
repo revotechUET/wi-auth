@@ -57,7 +57,7 @@ router.post('/login', function (req, res) {
                     if (user.status === "Inactive") {
                         res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
                     } else if (user.status === "Active") {
-                        let data = {username: user.username, whoami: req.body.whoami, role: user.role};
+                        let data = {username: user.username, whoami: req.body.whoami, role: user.role, company: user.company};
                         let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                         let response = {};
                         response.token = token;
@@ -83,7 +83,7 @@ router.post('/login', function (req, res) {
                         if (user.status === "Inactive") {
                             res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
                         } else if (user.status === "Active") {
-                            let data = {username: user.username, whoami: req.body.whoami, role: user.role};
+                            let data = {username: user.username, whoami: req.body.whoami, role: user.role, company: user.company};
                             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
                             let response = {};
                             response.token = token;
