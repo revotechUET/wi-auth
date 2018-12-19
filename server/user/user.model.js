@@ -353,13 +353,19 @@ async function changePassword(payload, username) {
 }
 
 function listUserByCompany(payload, done, username) {
-	if (payload.idCompany) {
-		User.findAll({where: {idCompany: payload.idCompany}}).then(users => {
-			done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
-		})
-	} else {
-		done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", []));
-	}
+	User.findOne({where: {username: username}}).then(user => {
+		if (payload.idCompany && user.role === 0) {
+			User.findAll({where: {idCompany: payload.idCompany}}).then(users => {
+				done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
+			});
+		} else if (user.role === 1) {
+			User.findAll({where: {idCompany: user.idCompany}}).then(users => {
+				done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
+			});
+		} else {
+			done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", [user]));
+		}
+	});
 }
 
 module.exports = {
