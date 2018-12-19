@@ -13,7 +13,7 @@ router.post('/user/list', function (req, res) {
 router.post('/user/list-by-company', (req, res) => {
 	model.listUserByCompany(req.body, function (status) {
 		res.send(status);
-	}, req.decoded);
+	}, req.decoded.username);
 });
 
 router.post('/user/new', function (req, res) {

@@ -359,6 +359,7 @@ function listUserByCompany(payload, done, username) {
 				done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
 			});
 		} else if (user.role === 1) {
+			console.log("aaa")
 			User.findAll({where: {idCompany: user.idCompany}}).then(users => {
 				done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
 			});
