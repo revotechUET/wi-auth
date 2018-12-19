@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage("Rsync dev") {
             steps {
-                sh 'rsync --delete -azvv ./* -e ssh i2g-admin-api-production:/home/ubuntu/wi-auth'
+                sh 'rsync -azvv ./* -e ssh i2g-admin-api-production:/home/ubuntu/wi-auth'
             }
         }
 
