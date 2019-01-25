@@ -16,7 +16,7 @@ let companyRouter = require('./server/company/company.router');
 let http = require('http').Server(app);
 
 app.get('/test', (req, res) => {
-	res.send("v1.0");
+	res.send("v1.01");
 });
 
 //use authenticate
