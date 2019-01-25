@@ -26,10 +26,14 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 
+app.get('/test', (req, res) => {
+	res.send("v1.0");
+});
+
 
 app.get('/', function (req, res) {
-    res.send("Welcome to WI-Authentication Service");
+	res.send("Welcome to WI-Authentication Service");
 });
 http.listen(config.port, function () {
-    console.log("Listening on port " + config.port);
+	console.log("Listening on port " + config.port);
 });
