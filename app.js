@@ -15,6 +15,10 @@ let sharedProjectRouter = require('./server/shared-project/shared-project.router
 let companyRouter = require('./server/company/company.router');
 let http = require('http').Server(app);
 
+app.get('/test', (req, res) => {
+	res.send("v1.0");
+});
+
 //use authenticate
 app.use(cors());
 app.use('/', authenRouter);
@@ -25,10 +29,6 @@ app.use('/', userRouter);
 app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
-
-app.get('/test', (req, res) => {
-	res.send("v1.0");
-});
 
 
 app.get('/', function (req, res) {
