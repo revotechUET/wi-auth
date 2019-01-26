@@ -3,8 +3,8 @@ let app = express();
 let fullConfig = require('config');
 let config = fullConfig.Application;
 let cors = require('cors');
+let crypto = require('crypto');
 let serverId = getRandomHash();
-const crypto = require('crypto');
 
 function getRandomHash() {
 	const current_date = (new Date()).valueOf().toString();
