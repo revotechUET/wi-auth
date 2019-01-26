@@ -29,7 +29,7 @@ app.get('/', function (req, res) {
 });
 app.get('/test', (req, res) => {
 	setTimeout(() => {
-		res.json(res.json({serverId: serverId}));
+		res.json({serverId: serverId});
 	}, 4000);
 });
 
