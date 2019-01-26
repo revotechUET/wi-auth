@@ -3,6 +3,15 @@ let app = express();
 let fullConfig = require('config');
 let config = fullConfig.Application;
 let cors = require('cors');
+let serverId = getRandomHash();
+const crypto = require('crypto');
+
+function getRandomHash() {
+	const current_date = (new Date()).valueOf().toString();
+	const random = Math.random().toString();
+	return (crypto.createHash('sha1').update(current_date + random).digest('hex'));
+}
+
 
 //Router
 let authenRouter = require('./server/authenticate/authenticate.router');
@@ -15,8 +24,8 @@ let sharedProjectRouter = require('./server/shared-project/shared-project.router
 let companyRouter = require('./server/company/company.router');
 let http = require('http').Server(app);
 
-app.get('/test', (req, res) => {
-	res.send("v1.01");
+app.get('/', function (req, res) {
+	res.json({serverId: serverId});
 });
 
 //use authenticate
@@ -30,10 +39,6 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 
-
-app.get('/', function (req, res) {
-	res.send("Welcome to WI-Authentication Service");
-});
 http.listen(config.port, function () {
-	console.log("Listening on port " + config.port);
+	console.log("Listening on port " + config.port, " Server ID: ", serverId);
 });
