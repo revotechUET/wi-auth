@@ -27,6 +27,11 @@ let http = require('http').Server(app);
 app.get('/', function (req, res) {
 	res.json({serverId: serverId});
 });
+app.get('test', (req, res) => {
+	setTimeout(() => {
+		res.json(res.json({serverId: serverId}));
+	}, 4000);
+});
 
 //use authenticate
 app.use(cors());
