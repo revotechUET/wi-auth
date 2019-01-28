@@ -38,13 +38,13 @@ app.get('/test', (req, res) => {
 app.use(cors());
 app.use('/', authenRouter);
 app.use('/', captchaRouter);
+app.use('/', userLanguageRouter);
 app.use(authenticate());
 // app.use(authorize());
 app.use('/', userRouter);
 app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
-app.use('/', userLanguageRouter);
 
 http.listen(config.port, function () {
 	console.log("Listening on port " + config.port, " Server ID: ", serverId);
