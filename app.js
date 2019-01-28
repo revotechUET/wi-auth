@@ -22,6 +22,7 @@ let authenticate = require('./server/authenticate/authenticate');
 // let authorize = require('./server/authorize/authorize');
 let sharedProjectRouter = require('./server/shared-project/shared-project.router');
 let companyRouter = require('./server/company/company.router');
+let userLanguageRouter = require('./server/language');
 let http = require('http').Server(app);
 
 app.get('/', function (req, res) {
@@ -43,6 +44,7 @@ app.use('/', userRouter);
 app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
+app.use('/', userLanguageRouter);
 
 http.listen(config.port, function () {
 	console.log("Listening on port " + config.port, " Server ID: ", serverId);
