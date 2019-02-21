@@ -1,14 +1,18 @@
 let ResponseJSON = require('../response');
 let Model = require('../models-master');
 let asyncEach = require('async/each');
-let fs = require('fs');
-let md5 = require('md5');
+
+function getRandomHash() {
+	const current_date = (new Date()).valueOf().toString();
+	const random = Math.random().toString();
+	return (crypto.createHash('sha1').update(current_date + random).digest('hex'));
+}
 
 function createNewSharedProject(data, done, username) {
     // let conditions = username ? {username: username} : {username: data.username};
     let conditions = data.username ? {username: data.username} : {username: username};
     Model.User.findOne({where: conditions}).then((user => {
-        data.shareKey = md5(data.project_name + user.idUser);
+        data.shareKey = getRandomHash();
         Model.SharedProject.findOrCreate({
             where: {project_name: data.name, idOwner: user.idUser},
             defaults: data
