@@ -15,6 +15,6 @@ RUN npm install
 # Set Environment
 ENV NODE_ENV=production
 
-EXPOSE 2999
+EXPOSE 80
 
 CMD ["node", "app.js"]
