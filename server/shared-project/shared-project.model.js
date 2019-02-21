@@ -1,6 +1,7 @@
 let ResponseJSON = require('../response');
 let Model = require('../models-master');
 let asyncEach = require('async/each');
+let crypto = require('crypto');
 
 function getRandomHash() {
 	const current_date = (new Date()).valueOf().toString();
