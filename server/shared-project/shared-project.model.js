@@ -16,7 +16,11 @@ function createNewSharedProject(data, done, username) {
         data.shareKey = getRandomHash();
         Model.SharedProject.findOrCreate({
             where: {project_name: data.name, idOwner: user.idUser},
-            defaults: data
+            defaults: {
+                project_name: data.name,
+                shareKey: data.shareKey,
+                idOwner: user.idUser
+            }
         }).then(d => {
             done(ResponseJSON(200, "Successfull", d[0]));
         }).catch(err => {
