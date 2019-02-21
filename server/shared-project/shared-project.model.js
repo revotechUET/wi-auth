@@ -15,9 +15,9 @@ function createNewSharedProject(data, done, username) {
     Model.User.findOne({where: conditions}).then((user => {
         data.shareKey = getRandomHash();
         Model.SharedProject.findOrCreate({
-            where: {project_name: data.name, idOwner: user.idUser},
+            where: {project_name: data.name || data.project_name, idOwner: user.idUser},
             defaults: {
-                project_name: data.name,
+                project_name: data.name || data.project_name,
                 shareKey: data.shareKey,
                 idOwner: user.idUser
             }
