@@ -23,13 +23,14 @@ sequelize.sync()
         console.log(err);
     });
 let models = [
+	'Company',
     'Group',
     'RefreshToken',
     'SharedProject',
     'SharedProjectGroup',
     'User',
     'UserGroupPermission',
-    'Company'
+    'UserLanguage'
 ];
 models.forEach(function (model) {
     module.exports[model] = sequelize.import(__dirname + '/' + model);

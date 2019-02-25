@@ -1,7 +1,6 @@
 let ResponseJSON = require('../response');
 let Model = require('../models-master');
 let asyncEach = require('async/each');
-let fs = require('fs');
 let crypto = require('crypto');
 
 function getRandomHash() {
@@ -11,23 +10,23 @@ function getRandomHash() {
 }
 
 function createNewSharedProject(data, done, username) {
-	// let conditions = username ? {username: username} : {username: data.username};
-	let conditions = data.username ? {username: data.username} : {username: username};
-	Model.User.findOne({where: conditions}).then((user => {
-		data.shareKey = getRandomHash();
-		Model.SharedProject.findOrCreate({
-			where: {project_name: data.name || data.project_name, idOwner: user.idUser},
-			defaults: {
-				project_name: data.name || data.project_name,
-				shareKey: data.shareKey,
-				idOwner: user.idUser
-			}
-		}).then(d => {
-			done(ResponseJSON(200, "Successfull", d[0]));
-		}).catch(err => {
-			done(ResponseJSON(512, err, err));
-		});
-	}));
+    // let conditions = username ? {username: username} : {username: data.username};
+    let conditions = data.username ? {username: data.username} : {username: username};
+    Model.User.findOne({where: conditions}).then((user => {
+        data.shareKey = getRandomHash();
+        Model.SharedProject.findOrCreate({
+            where: {project_name: data.name || data.project_name, idOwner: user.idUser},
+            defaults: {
+                project_name: data.name || data.project_name,
+                shareKey: data.shareKey,
+                idOwner: user.idUser
+            }
+        }).then(d => {
+            done(ResponseJSON(200, "Successfull", d[0]));
+        }).catch(err => {
+            done(ResponseJSON(512, err, err));
+        });
+    }));
 }
 
 function removeSharedProject(data, done) {

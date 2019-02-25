@@ -64,6 +64,11 @@ router.post('/login', function (req, res) {
                         refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
                             response.refresh_token = refreshToken;
                             response.company = user.company;
+	                        response.user = {
+		                        username: user.username,
+		                        role: user.role,
+		                        idCompany: user.idCompany
+	                        };
                             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                         });
                     } else {
@@ -96,6 +101,11 @@ router.post('/login', function (req, res) {
                                     });
                                 });
                             } else {
+	                            response.user = {
+		                            username: user.username,
+		                            role: user.role,
+		                            idCompany: user.idCompany
+	                            };
                                 return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                             }
                         } else {

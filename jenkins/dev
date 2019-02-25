@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage("Rsync dev") {
             steps {
-                sh 'rsync --delete -azvv ./* -e ssh i2g-dev:/opt/wi-auth'
+                sh 'rsync -azvv ./* -e ssh i2g-dev:/opt/wi-auth'
             }
         }
 
