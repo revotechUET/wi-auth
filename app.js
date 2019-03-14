@@ -46,6 +46,6 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 
-http.listen(config.port, function () {
-	console.log("Listening on port " + config.port, " Server ID: ", serverId);
+http.listen(process.env.AUTH_PORT || config.port, function () {
+	console.log("Listening on port " + process.env.AUTH_PORT || config.port, " Server ID: ", serverId);
 });

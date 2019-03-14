@@ -6,7 +6,6 @@ let SharedProject = models.SharedProject;
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
 let md5 = require('md5');
-let config = require('config').backend_service;
 let async = require('async');
 
 function createUser(userInfo, done) {
@@ -247,32 +246,6 @@ function deleteUser(userInfo, done) {
 	}).catch(err => {
 		done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
 	})
-}
-
-function dropDb(payload, done) {
-	let request = require('request');
-	let dbName = 'wi_' + payload.username.toLowerCase();
-	let host = config.host + ":" + config.port;
-	let options = {
-		uri: host + '/database/update',
-		method: 'DELETE',
-		json: {
-			"dbName": dbName
-		}
-	};
-	request(
-		options,
-		function (error, response, body) {
-			if (error) {
-				return done(ResponseJSON(ErrorCodes.INTERNAL_SERVER_ERROR, "BACKEND_SERVICE_ERROR"));
-			}
-
-			if (body.code === 200) {
-				return done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
-			}
-			done(body);
-		});
-
 }
 
 function getPermission(payload, done, username) {
