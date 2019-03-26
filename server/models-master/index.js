@@ -9,7 +9,7 @@ const sequelize = new Sequelize(process.env.AUTH_DBNAME || config.dbName, proces
 	},
 	dialect: process.env.AUTH_DBDIALECT || config.dialect,
 	port: process.env.AUTH_DBPORT || config.port,
-	logging: process.env.AUTH_DBLOGGING || config.logging,
+	logging: false,
 	pool: {
 		max: 20,
 		min: 0,
