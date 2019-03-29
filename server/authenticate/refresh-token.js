@@ -2,7 +2,7 @@ let models = require("../models-master/index");
 let RefreshToken = models.RefreshToken;
 let randToken = require('rand-token');
 const asyncEach = require('async/each');
-const TIME_OUT = 1000 * 60 * 60 * 24;
+const TIME_OUT = 1000 * 60 * 60 * 24 * 5;
 
 let createRefreshToken = function (idUser, callback) {
     let refreshToken = new Object();
