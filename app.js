@@ -26,11 +26,11 @@ let userLanguageRouter = require('./server/language');
 let http = require('http').Server(app);
 
 app.get('/', function (req, res) {
-	res.json({serverId: serverId});
+	res.json({serverId: serverId, version: 4.0});
 });
 app.get('/test', (req, res) => {
 	setTimeout(() => {
-		res.json({serverId: serverId});
+		res.json({serverId: serverId, version: 4.0});
 	}, 4000);
 });
 
