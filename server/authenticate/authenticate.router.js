@@ -28,7 +28,7 @@ router.post('/refresh-token', function (req, res) {
                             } else {
                                 delete decoded.iat;
                                 delete decoded.exp;
-                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '48h'});
+                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '240h'});
                                 let response = {};
                                 response.token = accessToken;
                                 response.refresh_token = newRefreshToken;

@@ -12,10 +12,6 @@
     //Path to database.sqlite (used for sqlite only)
     "dbName": "bmq_database"
   },
-  "backend_service": {
-    "host": "http://dev.sflow.me",
-    "port": 80
-  },
   "Application": {
     "port": 2999
   }

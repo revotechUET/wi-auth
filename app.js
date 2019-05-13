@@ -26,11 +26,11 @@ let userLanguageRouter = require('./server/language');
 let http = require('http').Server(app);
 
 app.get('/', function (req, res) {
-	res.json({serverId: serverId});
+	res.json({serverId: serverId, version: 4.0});
 });
 app.get('/test', (req, res) => {
 	setTimeout(() => {
-		res.json({serverId: serverId});
+		res.json({serverId: serverId, version: 4.0});
 	}, 4000);
 });
 
@@ -46,6 +46,6 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 
-http.listen(config.port, function () {
-	console.log("Listening on port " + config.port, " Server ID: ", serverId);
+http.listen(process.env.AUTH_PORT || config.port, function () {
+	console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
 });

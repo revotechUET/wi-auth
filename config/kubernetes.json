@@ -1,0 +1,15 @@
+{
+  "Database": {
+    "dialect": "",
+    "host": "",
+    "port": 3306,
+    "user": "",
+    "password": "",
+    "logging": false,
+    "storage": "",
+    "dbName": ""
+  },
+  "Application": {
+    "port": 2999
+  }
+}
