@@ -7,14 +7,13 @@ WORKDIR /app
 
 # Copy app source
 COPY . /app
-COPY ./config/kubernetes.json /app/config
 
 # Install npm package
 COPY package.json /app
 RUN npm install
 
 # Set Environment
-ENV NODE_ENV=kubernetes
+ENV NODE_ENV=local-service
 
 EXPOSE 2999
 
