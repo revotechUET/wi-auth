@@ -2,10 +2,10 @@
   "Database": {
     "dialect": "mysql",
     // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
-    "host": "localhost",
+    "host": "172.17.0.1",
     "port": 3306,
-    "user": "root",
-    "password": "172.17.0.1",
+    "user": "thanh",
+    "password": "qwertyuiop",
     "logging": false,
     //Logging all database query if is set "true"
     "storage": "/tmp/wi_backend.sqlite",
