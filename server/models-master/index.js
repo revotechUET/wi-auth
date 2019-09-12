@@ -11,9 +11,9 @@ const sequelize = new Sequelize(process.env.AUTH_DBNAME || config.dbName, proces
 	port: process.env.AUTH_DBPORT || config.port,
 	logging: false,
 	pool: {
-		max: 20,
+		max: 2,
 		min: 0,
-		idle: 200
+		idle: 10000
 	},
 	storage: process.env.AUTH_DBSTORAGE || config.storage,
 	operatorsAliases: Sequelize.Op
@@ -25,6 +25,9 @@ sequelize.sync()
 let models = [
 	'Company',
 	'Group',
+	'I2gApi',
+	'I2gFeature',
+	'LicensePackage',
 	'RefreshToken',
 	'SharedProject',
 	'SharedProjectGroup',
@@ -47,6 +50,7 @@ models.forEach(function (model) {
 	m.Group.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}});
 	m.Company.hasMany(m.User, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
 	m.User.belongsTo(m.Company, {foreignKey: {name: 'idCompany', allowNull: false}, onDelete: 'CASCADE'});
+
 	m.User.belongsToMany(m.Group, {
 		through: m.UserGroupPermission,
 		foreignKey: 'idUser'
@@ -55,18 +59,49 @@ models.forEach(function (model) {
 		through: m.UserGroupPermission,
 		foreignKey: 'idGroup'
 	});
+
 	m.SharedProject.belongsToMany(m.Group, {
 		through: 'shared_project_group',
 		foreignKey: 'idSharedProject'
 	});
-	m.Group.belongsToMany(m.SharedProject, {
-		through: 'shared_project_group',
-		foreignKey: 'idSharedProject'
-	});
+	// m.Group.belongsToMany(m.SharedProject, {
+	// 	through: 'shared_project_group',
+	// 	foreignKey: 'idSharedProject'
+	// });
 	m.Group.belongsToMany(m.SharedProject, {
 		through: 'shared_project_group',
 		foreignKey: 'idGroup'
 	});
-	///user.addGroup(group, {through: {permission: 5});
+
+	m.User.belongsToMany(m.LicensePackage, {
+		through: 'user_license_package',
+		timestamps: false,
+		foreignKey: 'idUser'
+	});
+	m.LicensePackage.belongsToMany(m.User, {
+		through: 'user_license_package',
+		timestamps: false,
+		foreignKey: 'idLicensePackage'
+	});
+	m.LicensePackage.belongsToMany(m.I2gFeature, {
+		through: 'license_package_i2g_feature',
+		timestamps: false,
+		foreignKey: 'idLicensePackage'
+	});
+	m.I2gFeature.belongsToMany(m.LicensePackage, {
+		through: 'license_package_i2g_feature',
+		timestamps: false,
+		foreignKey: 'idFeature'
+	});
+	m.I2gFeature.belongsToMany(m.I2gApi, {
+		through: 'i2g_feature_i2g_api',
+		timestamps: false,
+		foreignKey: 'idFeature'
+	});
+	m.I2gApi.belongsToMany(m.I2gFeature, {
+		through: 'i2g_feature_i2g_api',
+		timestamps: false,
+		foreignKey: 'idApi'
+	});
 })(module.exports);
 module.exports.sequelize = sequelize;
