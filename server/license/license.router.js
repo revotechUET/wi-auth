@@ -9,4 +9,10 @@ router.post('/user/license', (req, res) => {
 	}, req.decoded.username)
 });
 
+router.post('/license-package/list', (req, res) => {
+    Model.getAllLicensePackages(req.body, (status) =>{
+        res.send(status);
+    })
+})
+
 module.exports = router;

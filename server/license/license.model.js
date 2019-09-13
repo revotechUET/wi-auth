@@ -6,24 +6,30 @@ const ResponseJSON = require('../response');
 const ErrorCodes = require('../../error-codes').CODES;
 
 function getUserLicense(payload, cb, username) {
-	let options = {where: {username: username}, include: {}};
-	switch (payload.type) {
-		case "feature":
-			options.include = {model: LicensePackage, include: {model: Feature}};
-			break;
-		case "package":
-			options.include = {model: LicensePackage};
-			break;
-		default:
-			options.include = {model: LicensePackage, include: {model: Feature, include: {model: Api}}};
-			break;
-	}
-	User.findOne(options).then(u => {
-		cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
-	});
+    let options = {where: {username: username}, include: {}};
+    switch (payload.type) {
+        case "feature":
+            options.include = {model: LicensePackage, include: {model: Feature}};
+            break;
+        case "package":
+            options.include = {model: LicensePackage};
+            break;
+        default:
+            options.include = {model: LicensePackage, include: {model: Feature, include: {model: Api}}};
+            break;
+    }
+    User.findOne(options).then(u => {
+        cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
+    });
 }
 
+function getAllLicensePackages(payload, cb) {
+    LicensePackage.findAll().then(lps => {
+        cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", lps));
+    });
+}
 
 module.exports = {
-	getUserLicense
+    getUserLicense,
+    getAllLicensePackages
 };
