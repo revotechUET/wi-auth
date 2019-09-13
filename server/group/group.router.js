@@ -35,8 +35,8 @@ router.post("/group/add-user", function (req, res) {
 //     console.log('suc')
 // });
 
-router.post('/group/add-user-to-groups', function(req, res){
-    groupModel.addUserToGroups(req.body, function(data) {
+router.post('/group/add-user-to-groups', function (req, res) {
+    groupModel.addUserToGroups(req.body, function (data) {
         res.send(data);
     })
 });
@@ -57,10 +57,16 @@ router.post('/group/update-project-permission', function (req, res) {
     })
 });
 
-router.post('/group/add-users-to-group', function(req, res) {
-    groupModel.addUsersToGroup(req.body, function(data) {
+router.post('/group/add-users-to-group', function (req, res) {
+    groupModel.addUsersToGroup(req.body, function (data) {
         res.send(data)
     })
-})
+});
+
+router.post('/group/edit', function (req, res) {
+    groupModel.editGroupInfo(req.body, (data) => {
+        res.send(data);
+    })
+});
 
 module.exports = router;

@@ -226,6 +226,22 @@ async function addUsersToGroup(data, done) {
     }
 }
 
+function editGroupInfo(data, done) {
+    Model.Group.findById(data.idGroup).then(group => {
+        if (group) {
+            group.name = data.name || group.name;
+            group.description = data.description || group.description;
+            group.save().then((g) => {
+                done(responseJSON(200, "Done", g));
+            }).catch(err => {
+                done(responseJSON(512, err, err));
+            })
+        } else {
+            done(responseJSON(512, "Group not found by id", "Group not found by id"));
+        }
+    })
+}
+
 module.exports = {
     createNewGroup: createNewGroup,
     listGroup: listGroup,
@@ -235,5 +251,6 @@ module.exports = {
     getProjectPermission: getProjectPermission,
     updateProjectPermission: updateProjectPermission,
     addUserToGroups,
-    addUsersToGroup
+    addUsersToGroup,
+    editGroupInfo
 };
