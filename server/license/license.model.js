@@ -24,12 +24,49 @@ function getUserLicense(payload, cb, username) {
 }
 
 function getAllLicensePackages(payload, cb) {
-    LicensePackage.findAll().then(lps => {
+    LicensePackage.findAll({include: [{model: Feature}]}).then(lps => {
         cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", lps));
     });
 }
 
+function newLicensePackage(payload, cb) {
+    LicensePackage.create(payload).then(l => {
+        cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", l));
+    }).catch(err => {
+        cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err))
+    })
+}
+
+function editLicensePackage(payload, cb) {
+    LicensePackage.findByPk(payload.idLicensePackage).then(ls => {
+        if (ls) {
+            Object.assign(ls, payload).save().then(l => {
+                cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", l));
+            }).catch(err => {
+                cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
+            })
+        } else {
+            cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No package found"));
+        }
+    })
+}
+
+function getAllLicenseFeature(payload, cb) {
+    if (payload.idLicensePackage) {
+        Feature.findAll({where: {idLicensePackage: payload.idLicensePackage}}), then(f => {
+            cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", f));
+        })
+    } else {
+        Feature.findAll({include: [{model: Api}]}).then(f => {
+            cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", f))
+        });
+    }
+}
+
 module.exports = {
     getUserLicense,
-    getAllLicensePackages
+    getAllLicensePackages,
+    newLicensePackage,
+    editLicensePackage,
+    getAllLicenseFeature
 };
