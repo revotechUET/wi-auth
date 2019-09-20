@@ -21,6 +21,12 @@ router.post('/license-package/new', (req, res) => {
     })
 });
 
+router.post('/license-package/delete', (req, res) => {
+    Model.deleteLicensePackage(req.body, status => {
+        res.send(status);
+    })
+});
+
 router.post('/license-package/edit', (req, res) => {
     Model.editLicensePackage(req.body, (status) => {
         res.send(status);
@@ -29,6 +35,12 @@ router.post('/license-package/edit', (req, res) => {
 
 router.post('/feature/list', (req, res) => {
     Model.getAllLicenseFeature(req.body, status => {
+        res.send(status);
+    });
+});
+
+router.post('/feature/delete', (req, res) => {
+    Model.deleteFeature(req.body, status => {
         res.send(status);
     });
 });

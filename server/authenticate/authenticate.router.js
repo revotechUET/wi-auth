@@ -17,7 +17,7 @@ router.post('/refresh-token', function (req, res) {
 	let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
 	refreshTokenModel.checkRefreshToken(refreshToken, function (result) {
 		if (result) {
-			User.findById(result.idUser).then(user => {
+			User.findByPk(result.idUser).then(user => {
 				if (user.status !== "Active") {
 					res.status(401).send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "You are not activated. Please wait for account activation.", "You are not activated. Please wait for account activation."));
 				} else {

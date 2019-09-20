@@ -13,7 +13,7 @@ function createCompany(payload, callback) {
 }
 
 function editCompany(payload, callback) {
-    models.Company.findById(payload.idCompany).then(comp => {
+    models.Company.findByPk(payload.idCompany).then(comp => {
         if (comp) {
             Object.assign(comp, payload).save().then(c => {
                 callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", c));
@@ -27,7 +27,7 @@ function editCompany(payload, callback) {
 }
 
 function deleteCompany(payload, callback) {
-    models.Company.findById(payload.idCompany).then(comp => {
+    models.Company.findByPk(payload.idCompany).then(comp => {
         if (comp) {
             comp.destroy().then(() => {
                 callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", comp));
@@ -41,7 +41,7 @@ function deleteCompany(payload, callback) {
 }
 
 function infoCompany(payload, callback) {
-    models.Company.findById(payload.idCompany).then(comp => {
+    models.Company.findByPk(payload.idCompany).then(comp => {
         if (comp) {
             callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", comp));
         } else {

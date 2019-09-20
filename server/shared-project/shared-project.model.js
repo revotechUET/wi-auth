@@ -86,7 +86,7 @@ function addToGroup(data, done) {
                 done(ResponseJSON(512, err, err));
             });
         } else {
-            Model.SharedProject.findById(data.idSharedProject).then(rs => {
+            Model.SharedProject.findByPk(data.idSharedProject).then(rs => {
                 let defaultPerm = require('../utils/default-permission.json');
                 rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
                 done(ResponseJSON(200, 'Successful', data));
@@ -95,7 +95,7 @@ function addToGroup(data, done) {
             });
         }
     } else if (data.type === "remove") {
-        Model.SharedProject.findById(data.idSharedProject).then(rs => {
+        Model.SharedProject.findByPk(data.idSharedProject).then(rs => {
             rs.removeGroup(data.idGroup);
             done(ResponseJSON(200, 'Successfull', data));
         }).catch(err => {
@@ -127,7 +127,7 @@ function getSharedProjectList(data, done) {
     }).then(user => {
         asyncEach(user.groups, function (group, nextGroup) {
             asyncEach(group.shared_projects, function (sharedProject, nextProject) {
-                Model.User.findById(sharedProject.idOwner).then(u => {
+                Model.User.findByPk(sharedProject.idOwner).then(u => {
                     let found = listPrj.filter(x => x.owner === u.username && x.name === sharedProject.project_name);
                     if (found.length === 0 && u.username !== data.username) {
                         listPrj.push({

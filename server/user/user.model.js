@@ -20,7 +20,7 @@ function createUser(userInfo, done) {
 }
 
 function infoUser(userInfo, done) {
-    User.findById(userInfo.idUser).then(user => {
+    User.findByPk(userInfo.idUser).then(user => {
         if (user) {
             done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
         } else {
@@ -35,7 +35,7 @@ function infoUser(userInfo, done) {
 //     // console.log(userInfo);
 //     // userInfo.password = md5(userInfo.password);
 //     if (userInfo.password === "") delete userInfo.password;
-//     User.findById(userInfo.idUser).then(user => {
+//     User.findByPk(userInfo.idUser).then(user => {
 //         if (user) {
 //             if (userInfo.password) {
 //                 userInfo.password = md5(userInfo.password);
@@ -58,7 +58,7 @@ function editUser(userInfo, done) {
     // console.log(userInfo);
     // userInfo.password = md5(userInfo.password);
     if (userInfo.password === "") delete userInfo.password;
-    User.findById(userInfo.idUser).then(async user => {
+    User.findByPk(userInfo.idUser).then(async user => {
         if (user) {
             if (userInfo.password) {
                 userInfo.password = md5(userInfo.password);
@@ -79,7 +79,7 @@ function editUser(userInfo, done) {
 
             if (userInfo.idGroup) {
                 try {
-                    const group = await models.Group.findById(userInfo.idGroup);
+                    const group = await models.Group.findByPk(userInfo.idGroup);
                     if (!group) {
                         return done(responseJSON(512, "No group found by id"));
                     }
@@ -110,7 +110,7 @@ function checkLicense(idCompany, cb) {
     User.findAll({where: {idCompany: idCompany, status: "Active"}}).then(users => {
         let activeUsers = users.length;
         console.log("Total actived user ", activeUsers);
-        Company.findById(idCompany).then(company => {
+        Company.findByPk(idCompany).then(company => {
             if (company.licenses > activeUsers) {
                 cb(true);
             } else {
@@ -121,7 +121,7 @@ function checkLicense(idCompany, cb) {
 }
 
 function changeUserStatus(userInfo, done) {
-    User.findById(userInfo.idUser).then(user => {
+    User.findByPk(userInfo.idUser).then(user => {
         if (user) {
             if (userInfo.status === "Active") {
                 checkLicense(user.idCompany, function (pass) {
@@ -164,7 +164,7 @@ function listUser(userInfo, done, decoded) {
                 }).then(sp => {
                     if (sp) {
                         async.each(sp.groups, function (group, next) {
-                            models.Group.findById(group.idGroup, {include: {model: models.User}}).then(g => {
+                            models.Group.findByPk(group.idGroup, {include: {model: models.User}}).then(g => {
                                 async.each(g.users, function (u, nextU) {
                                     let find = response.find(_u => _u.username === u.username);
                                     if (!find) response.push(u);
@@ -215,7 +215,7 @@ function listUser(userInfo, done, decoded) {
 }
 
 function deleteUser(userInfo, done) {
-    User.findById(userInfo.idUser).then(user => {
+    User.findByPk(userInfo.idUser).then(user => {
         if (user) {
             User.destroy({where: {idUser: user.idUser}, individualHooks: true}).then(rs => {
                 if (rs > 0) {
@@ -271,7 +271,7 @@ function getPermission(payload, done, username) {
             }
         }).then(user => {
             async.each(user.groups, function (group, nextGroup) {
-                models.Group.findById(group.idGroup, {
+                models.Group.findByPk(group.idGroup, {
                     include: {
                         model: models.SharedProject,
                         where: {project_name: payload.project_name}
@@ -298,7 +298,7 @@ function getPermission(payload, done, username) {
 }
 
 function forceLogOut(payload, done, username) {
-    models.User.findById(payload.idUser).then(user => {
+    models.User.findByPk(payload.idUser).then(user => {
         if (user) {
             models.RefreshToken.destroy({where: {idUser: user.idUser}}).then(() => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", user));

@@ -40,8 +40,12 @@ function newLicensePackage(payload, cb) {
 function editLicensePackage(payload, cb) {
     LicensePackage.findByPk(payload.idLicensePackage).then(ls => {
         if (ls) {
+            // console.log(payload.i2g_feature);
+            let featureApis = payload.i2g_feature.map(f => f.idFeature);
             Object.assign(ls, payload).save().then(l => {
-                cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", l));
+                l.setI2g_features(featureApis).then(() => {
+                    cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", l));
+                });
             }).catch(err => {
                 cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
             })
@@ -63,10 +67,40 @@ function getAllLicenseFeature(payload, cb) {
     }
 }
 
+function deleteLicensePackage(payload, cb) {
+    LicensePackage.findByPk(payload.idLicensePackage).then(lp => {
+        if (lp) {
+            lp.destroy().then(() => {
+                cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", lp));
+            }).catch(err => {
+                cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
+            })
+        } else {
+            cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No package found by id"));
+        }
+    })
+}
+
+function deleteFeature(payload, cb) {
+    Feature.findByPk(payload.idFeature).then(f => {
+        if (f) {
+            f.destroy().then(() => {
+                cb(ResponseJSON(ErrorCodes.SUCCESS, "Done", f));
+            }).catch(err => {
+                cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
+            })
+        } else {
+            cb(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No feature found by id"));
+        }
+    })
+}
+
 module.exports = {
     getUserLicense,
     getAllLicensePackages,
     newLicensePackage,
     editLicensePackage,
-    getAllLicenseFeature
+    getAllLicenseFeature,
+    deleteLicensePackage,
+    deleteFeature
 };

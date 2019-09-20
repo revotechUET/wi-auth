@@ -63,7 +63,7 @@ async function listGroup(data, done, decoded) {
 }
 
 function addUserToGroup(data, done) {
-    Model.Group.findById(data.idGroup).then(group => {
+    Model.Group.findByPk(data.idGroup).then(group => {
         if (group) {
             group.addUser(data.idUser, {through: {permission: 2}});
             done(responseJSON(200, "Successfull", data));
@@ -76,7 +76,7 @@ function addUserToGroup(data, done) {
 }
 
 function deleteGroup(data, done) {
-    Model.Group.findById(data.idGroup).then(group => {
+    Model.Group.findByPk(data.idGroup).then(group => {
         if (group) {
             group.destroy().then(() => {
                 done(responseJSON(200, "Successfull", group));
@@ -90,7 +90,7 @@ function deleteGroup(data, done) {
 }
 
 function removeUser(data, done) {
-    Model.Group.findById(data.idGroup, {include: {model: Model.User, where: {idUser: data.idUser}}}).then(group => {
+    Model.Group.findByPk(data.idGroup, {include: {model: Model.User, where: {idUser: data.idUser}}}).then(group => {
         if (group) {
             if (group.users[0].user_group_permission.permission === 1) {
                 done(responseJSON(200, "CANT_REMOVE_OWNER", "CANT_REMOVE_OWNER"));
@@ -106,7 +106,7 @@ function removeUser(data, done) {
 
 function getProjectPermission(data, done) {
     if (!data.project_name) return done(responseJSON(512, "Need Project Name"));
-    Model.Group.findById(data.idGroup, {
+    Model.Group.findByPk(data.idGroup, {
         include: {
             model: Model.SharedProject,
             where: {project_name: data.project_name}
@@ -178,9 +178,9 @@ async function addUserToGroups(data, done) {
 
                 const {id} = group;
                 if (group.type === 'remove') {
-                    return Model.Group.findById(id, {include: {model: Model.User, where: {idUser: data.idUser}}});
+                    return Model.Group.findByPk(id, {include: {model: Model.User, where: {idUser: data.idUser}}});
                 } else {
-                    return Model.Group.findById(id);
+                    return Model.Group.findByPk(id);
                 }
             });
 
@@ -211,7 +211,7 @@ async function addUserToGroups(data, done) {
 
 async function addUsersToGroup(data, done) {
     try {
-        const group = await Model.Group.findById(data.idGroup);
+        const group = await Model.Group.findByPk(data.idGroup);
 
         data.idUsers.forEach(id => {
             group.addUser(id)
@@ -227,7 +227,7 @@ async function addUsersToGroup(data, done) {
 }
 
 function editGroupInfo(data, done) {
-    Model.Group.findById(data.idGroup).then(group => {
+    Model.Group.findByPk(data.idGroup).then(group => {
         if (group) {
             group.name = data.name || group.name;
             group.description = data.description || group.description;
