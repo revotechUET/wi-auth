@@ -2,6 +2,7 @@
 let models = require("../models-master/index");
 let User = models.User;
 let Company = models.Company;
+let Group = models.Group;
 let SharedProject = models.SharedProject;
 let LicensePackage = models.LicensePackage;
 let ResponseJSON = require('../response');
@@ -190,14 +191,14 @@ function listUser(userInfo, done, decoded) {
         })
     } else {
         if (decoded.role === 0) {
-            User.findAll({include: [{model: LicensePackage}, {model: Company}]}).then(us => {
+            User.findAll({include: [{model: LicensePackage}, {model: Company}, {model: Group}]}).then(us => {
                 done(ResponseJSON(200, "Done", us));
             });
         } else if (decoded.role === 1) {
             const Op = require('sequelize').Op;
             User.findOne({
                 where: {username: decoded.username},
-                include: [{model: LicensePackage}, {model: Company}]
+                include: [{model: LicensePackage}, {model: Company}, {model: Group}]
             }).then(user => {
                 models.User.findAll({where: {idCompany: user.idCompany, role: {[Op.gte]: 1}}}).then(gs => {
                     done(ResponseJSON(200, "Done", gs));
@@ -206,7 +207,7 @@ function listUser(userInfo, done, decoded) {
         } else if (decoded.role === 2) {
             User.findAll({
                 where: {username: decoded.username},
-                include: [{model: LicensePackage}, {model: Company}]
+                include: [{model: LicensePackage}, {model: Company}, {mode: Group}]
             }).then(u => {
                 done(ResponseJSON(200, "Done", u));
             });
