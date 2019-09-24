@@ -7,9 +7,9 @@ const crypto = require('crypto');
 const serverId = getRandomHash();
 
 function getRandomHash() {
-	const current_date = (new Date()).valueOf().toString();
-	const random = Math.random().toString();
-	return (crypto.createHash('sha1').update(current_date + random).digest('hex'));
+    const current_date = (new Date()).valueOf().toString();
+    const random = Math.random().toString();
+    return (crypto.createHash('sha1').update(current_date + random).digest('hex'));
 }
 
 //Router
@@ -25,7 +25,9 @@ let licenseRouter = require('./server/license/license.router');
 let http = require('http').Server(app);
 
 app.get('/', function (req, res) {
-	res.json({serverId: serverId, version: 4.0});
+    res.json({serverId: serverId, version: 4.0});
+    // const routes = require('express-list-endpoints')(app);
+    // res.send(routes);
 });
 
 //use authenticate
@@ -39,7 +41,7 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 app.use('/', licenseRouter);
-
 http.listen(process.env.AUTH_PORT || config.port, function () {
-	console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
+    console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
+    require('./server/license/sync-feature-api')();
 });
