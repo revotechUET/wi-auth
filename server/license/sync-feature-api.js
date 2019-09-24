@@ -15,8 +15,13 @@ module.exports = function () {
                 route: row[1],
                 type: row[2]
             }
-        }).then(rs => {
-
+        }).then(async rs => {
+            let route = rs[0].toJSON();
+            for (let i = 1; i <= 10; i++) {
+                await rs[0].addI2g_feature(i, {through: {perm: row[2 + i]}});
+                console.log("Added for ", rs[0].route);
+            }
+            console.log("Done all api-feature sync")
         })
     })
 };

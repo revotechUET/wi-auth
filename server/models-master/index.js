@@ -27,6 +27,7 @@ let models = [
     'Group',
     'I2gApi',
     'I2gFeature',
+    'I2gFeatureI2gApi',
     'LicensePackage',
     'RefreshToken',
     'SharedProject',
