@@ -1,7 +1,7 @@
-var captchapng = require('captchapng');
-var express = require('express');
-var router = express.Router();
-var md5 = require('md5');
+let captchapng = require('captchapng');
+let express = require('express');
+let router = express.Router();
+let md5 = require('md5');
 
 
 function captchas() {
@@ -22,7 +22,7 @@ captchas.prototype.delete = function (captcha) {
     delete this[captcha];
 }
 
-var captchaList = new captchas();
+let captchaList = new captchas();
 
 setInterval(function () {
     // console.log(captchaList.lenght);
@@ -41,12 +41,12 @@ router.get("/captcha.png", function (req, res) {
     captchaList.put(randNumber, captchaValue);
     // console.log(captchaList.lenght);
     if (captchaList.lenght > 1000) captchaList = new captchas();
-    var p = new captchapng(80, 30, randNumber); // width,height,numeric captcha
+    let p = new captchapng(80, 30, randNumber); // width,height,numeric captcha
     p.color(0, 0, 0, 0);  // First color: background (red, green, blue, alpha)
     p.color(80, 80, 80, 255); // Second color: paint (red, green, blue, alpha)
 
-    var img = p.getBase64();
-    var imgbase64 = new Buffer(img, 'base64');
+    let img = p.getBase64();
+    let imgbase64 = new Buffer(img, 'base64');
     res.writeHead(200, {
         'Content-Type': 'image/png'
     });

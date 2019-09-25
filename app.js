@@ -13,6 +13,7 @@ function getRandomHash() {
 }
 
 //Router
+let proxy = require('./server/wi-express-http-proxy');
 let authenRouter = require('./server/authenticate/authenticate.router');
 let userRouter = require('./server/user/user.router');
 let captchaRouter = require('./server/captcha/captcha').router;
@@ -24,7 +25,7 @@ let userLanguageRouter = require('./server/language');
 let licenseRouter = require('./server/license/license.router');
 let http = require('http').Server(app);
 
-app.get('/', function (req, res) {
+app.get('/', async function (req, res) {
     res.json({serverId: serverId, version: 4.0});
     // const routes = require('express-list-endpoints')(app);
     // res.send(routes);
@@ -36,6 +37,11 @@ app.use('/', authenRouter);
 app.use('/', captchaRouter);
 app.use('/', userLanguageRouter);
 app.use(authenticate());
+app.get('/sync', async function (req, res) {
+    await require('./server/license/sync-feature-api')();
+    res.json("Sync successfully");
+});
+app.use(proxy());
 app.use('/', userRouter);
 app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
@@ -43,5 +49,4 @@ app.use('/', companyRouter);
 app.use('/', licenseRouter);
 http.listen(process.env.AUTH_PORT || config.port, function () {
     console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
-    require('./server/license/sync-feature-api')();
 });
