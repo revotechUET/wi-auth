@@ -5,9 +5,9 @@
 // * Uses a quasi-Global called Container to tidy up the argument passing between the major work-flow steps.
 
 let ScopeContainer = require('./lib/scopeContainer');
-let assert = require('assert');
 let debug = require('debug')('express-http-proxy');
 let config = require('config');
+let ResponseJSON = require("../response");
 
 let buildProxyReq = require('./app/steps/buildProxyReq');
 let copyProxyResHeadersToUserRes = require('./app/steps/copyProxyResHeadersToUserRes');
@@ -24,19 +24,30 @@ let resolveProxyReqPath = require('./app/steps/resolveProxyReqPath');
 let sendProxyRequest = require('./app/steps/sendProxyRequest');
 let sendUserRes = require('./app/steps/sendUserRes');
 
-module.exports = function proxy(userOptions) {
+const isMultipartRequest = function (req) {
+    let contentTypeHeader = req.headers['content-type'];
+    return contentTypeHeader && contentTypeHeader.indexOf('multipart') > -1;
+};
+
+module.exports = function proxy() {
     return function handleProxy(req, res, next) {
+        let userOptions = {
+            reqAsBuffer: !!isMultipartRequest(req),
+            reqBodyEncoding: isMultipartRequest(req) ? null : true,
+            parseReqBody: !isMultipartRequest(req)
+        };
         debug('[start proxy] ' + req.path);
-        let host = '127.0.0.1:3000';
-        switch (req.get("service")) {
+        let host = '127.0.0.1:2999';
+        let service = req.get("service") || req.query.service;
+        switch (service) {
             case "WI_BACKEND":
-                host = process.env.WI_SVC_WI_BACKEND || config.WI_SVC_WI_BACKEND || "127.0.0.1:3000";
+                host = process.env.WI_SVC_WI_BACKEND || config.WI_SVC_WI_BACKEND || "dev.i2g.cloud";
                 break;
             case "WI_INVENTORY":
-                host = process.env.WI_INVENTORY || config.WI_INVENTORY || "127.0.0.1:3000";
+                host = process.env.WI_INVENTORY || config.WI_INVENTORY || "inv.dev.i2g.cloud";
                 break;
             case "WI_PYTHON":
-                host = process.env.WI_PYTHON || config.WI_PYTHON || "127.0.0.1:3000";
+                host = process.env.WI_PYTHON || config.WI_PYTHON || "python.dev.i2g.cloud";
                 break;
             case "WI_FACIES_AI":
                 host = process.env.WI_FACIES_AI || config.WI_FACIES_AI || "127.0.0.1:3000";
@@ -105,9 +116,10 @@ module.exports = function proxy(userOptions) {
                 host = process.env.WI_ML_XGBOOST_REGRESSION || config.WI_ML_XGBOOST_REGRESSION || "127.0.0.1:3000";
                 break;
             default:
-                host = "127.0.0.1:2999";
-                break;
+                return next();
         }
+        delete req.headers['service'];
+        console.log("Forwarded ", req.originalUrl, " to ", host)
         let container = new ScopeContainer(req, res, next, host, userOptions);
 
         filterUserRequest(container)
@@ -131,7 +143,12 @@ module.exports = function proxy(userOptions) {
                     let resolver = (container.options.proxyErrorHandler) ?
                         container.options.proxyErrorHandler :
                         handleProxyErrors;
-                    resolver(err, res, next);
+                    if (err.code === "ECONNREFUSED") {
+                        res.send(ResponseJSON(512, "Our Service Temporarily Unavailable", "Our Service Temporarily Unavailable"));
+                        res.end();
+                    } else {
+                        resolver(err, res, next);
+                    }
                 } else {
                     next();
                 }
