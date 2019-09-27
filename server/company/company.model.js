@@ -2,8 +2,16 @@ let models = require('../models-master/index');
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
 let async = require('async');
+let crypto = require('crypto');
+
+function getRandomHash() {
+    const current_date = (new Date()).valueOf().toString();
+    const random = Math.random().toString();
+    return (crypto.createHash('sha1').update(current_date + random).digest('hex'));
+}
 
 function createCompany(payload, callback) {
+    payload.storage_location = getRandomHash();
     models.Company.create(payload).then(com => {
         callback(ResponseJSON(ErrorCodes.SUCCESS, "Successfull", com));
     }).catch(err => {

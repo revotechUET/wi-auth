@@ -23,6 +23,11 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 10
+        },
+        storage_location: {
+            type: DataTypes.STRING(250),
+            allowNull: false,
+            defaultValue: ""
         }
     });
 };
