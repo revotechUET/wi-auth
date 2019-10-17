@@ -256,7 +256,7 @@ function listUser(userInfo, done, decoded) {
             User.findAll({include: [{model: LicensePackage}, {model: Company}, {model: Group}]}).then(us => {
                 done(ResponseJSON(200, "Done", us));
             });
-        } else if (decoded.role === 1) {
+        } else if (decoded.role === 1 || decoded.role === 3) {
             const Op = require('sequelize').Op;
             User.findOne({
                 where: {username: decoded.username},
