@@ -41,85 +41,88 @@ module.exports = function proxy() {
         let service = req.get("service") || req.query.service;
         switch (service) {
             case "WI_BACKEND":
-                host = process.env.WI_SVC_WI_BACKEND || config.WI_SVC_WI_BACKEND || "dev.i2g.cloud";
+                host = process.env.WI_BACKEND || config._WI_BACKEND || "unknown.i2g.cloud";
                 break;
             case "WI_INVENTORY":
-                host = process.env.WI_INVENTORY || config.WI_INVENTORY || "inv.dev.i2g.cloud";
+                host = process.env.WI_INVENTORY || config.WI_INVENTORY || "unknown.i2g.cloud";
                 break;
             case "WI_PYTHON":
-                host = process.env.WI_PYTHON || config.WI_PYTHON || "python.dev.i2g.cloud";
+                host = process.env.WI_PYTHON || config.WI_PYTHON || "unknown.i2g.cloud";
                 break;
             case "WI_FACIES_AI":
-                host = process.env.WI_FACIES_AI || config.WI_FACIES_AI || "127.0.0.1:3000";
+                host = process.env.WI_FACIES_AI || config.WI_FACIES_AI || "unknown.i2g.cloud";
                 break;
             case "WI_CSV_TRANSFORM":
-                host = process.env.WI_CSV_TRANSFORM || config.WI_CSV_TRANSFORM || "127.0.0.1:3000";
+                host = process.env.WI_CSV_TRANSFORM || config.WI_CSV_TRANSFORM || "unknown.i2g.cloud";
                 break;
             case "WI_BASEMAP":
-                host = process.env.WI_BASEMAP || config.WI_BASEMAP || "127.0.0.1:3000";
+                host = process.env.WI_BASEMAP || config.WI_BASEMAP || "unknown.i2g.cloud";
                 break;
             case "WI_PROJECT_STORAGE":
-                host = process.env.WI_PROJECT_STORAGE || config.WI_PROJECT_STORAGE || "127.0.0.1:3000";
+                host = process.env.WI_PROJECT_STORAGE || config.WI_PROJECT_STORAGE || "unknown.i2g.cloud";
                 break;
             case "WI_WBS":
-                host = process.env.WI_WBS || config.WI_WBS || "127.0.0.1:3000";
+                host = process.env.WI_WBS || config.WI_WBS || "unknown.i2g.cloud";
                 break;
             case "WI_ML_COMBINATION_SOM":
-                host = process.env.WI_ML_COMBINATION_SOM || config.WI_ML_COMBINATION_SOM || "127.0.0.1:3000";
+                host = process.env.WI_ML_COMBINATION_SOM || config.WI_ML_COMBINATION_SOM || "unknown.i2g.cloud";
                 break;
             case "WI_ML_DECISION_TREE_CLASSIFIER":
-                host = process.env.WI_ML_DECISION_TREE_CLASSIFIER || config.WI_ML_DECISION_TREE_CLASSIFIER || "127.0.0.1:3000";
+                host = process.env.WI_ML_DECISION_TREE_CLASSIFIER || config.WI_ML_DECISION_TREE_CLASSIFIER || "unknown.i2g.cloud";
                 break;
             case "WI_ML_DECISION_TREE_REGRESSION":
-                host = process.env.WI_ML_DECISION_TREE_REGRESSION || config.WI_ML_DECISION_TREE_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_DECISION_TREE_REGRESSION || config.WI_ML_DECISION_TREE_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_DISTRIBUTION_SOM":
-                host = process.env.WI_ML_DISTRIBUTION_SOM || config.WI_ML_DISTRIBUTION_SOM || "127.0.0.1:3000";
+                host = process.env.WI_ML_DISTRIBUTION_SOM || config.WI_ML_DISTRIBUTION_SOM || "unknown.i2g.cloud";
                 break;
             case "WI_ML_HUBER_REGRESSION":
-                host = process.env.WI_ML_HUBER_REGRESSION || config.WI_ML_HUBER_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_HUBER_REGRESSION || config.WI_ML_HUBER_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_KNN_CLASSIFIER":
-                host = process.env.WI_ML_KNN_CLASSIFIER || config.WI_ML_KNN_CLASSIFIER || "127.0.0.1:3000";
+                host = process.env.WI_ML_KNN_CLASSIFIER || config.WI_ML_KNN_CLASSIFIER || "unknown.i2g.cloud";
                 break;
             case "WI_ML_LASSO_REGRESSION":
-                host = process.env.WI_ML_LASSO_REGRESSION || config.WI_ML_LASSO_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_LASSO_REGRESSION || config.WI_ML_LASSO_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_LINEAR_REGRESSION":
-                host = process.env.WI_ML_LINEAR_REGRESSION || config.WI_ML_LINEAR_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_LINEAR_REGRESSION || config.WI_ML_LINEAR_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_LOGISTIC_REGRESSION_CLASSIFIER":
-                host = process.env.WI_ML_LOGISTIC_REGRESSION_CLASSIFIER || config.WI_ML_LOGISTIC_REGRESSION_CLASSIFIER || "127.0.0.1:3000";
+                host = process.env.WI_ML_LOGISTIC_REGRESSION_CLASSIFIER || config.WI_ML_LOGISTIC_REGRESSION_CLASSIFIER || "unknown.i2g.cloud";
                 break;
-            case "WI_ML_LOGISTIC_REGRESSION_REGRESSION":
-                host = process.env.WI_ML_LOGISTIC_REGRESSION_REGRESSION || config.WI_ML_LOGISTIC_REGRESSION_REGRESSION || "127.0.0.1:3000";
+            case "WI_ML_NEURAL_NETWORK_CLASSIFIER":
+                host = process.env.WI_ML_NEURAL_NETWORK_CLASSIFIER || config.WI_ML_NEURAL_NETWORK_CLASSIFIER || "unknown.i2g.cloud";
+                break;
+            case "WI_ML_NEURAL_NETWORK_REGRESSION":
+                host = process.env.WI_ML_NEURAL_NETWORK_REGRESSION || config.WI_ML_NEURAL_NETWORK_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_NON_LINEAR_REGRESSION":
-                host = process.env.WI_ML_NON_LINEAR_REGRESSION || config.WI_ML_NON_LINEAR_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_NON_LINEAR_REGRESSION || config.WI_ML_NON_LINEAR_REGRESSION || "unknown.i2g.cloud";
                 break;
-            case "WI_ML_RANDOM_FOREST_CLASSIFIER":
-                host = process.env.WI_ML_RANDOM_FOREST_CLASSIFIER || config.WI_ML_RANDOM_FOREST_CLASSIFIER || "127.0.0.1:3000";
+            case "WI_ML_RANDOM_FOREST_CASSIFIER":
+                host = process.env.WI_ML_RANDOM_FOREST_CASSIFIER || config.WI_ML_RANDOM_FOREST_CASSIFIER || "unknown.i2g.cloud";
                 break;
             case "WI_ML_RANDOM_FOREST_REGRESSION":
-                host = process.env.WI_ML_RANDOM_FOREST_REGRESSION || config.WI_ML_RANDOM_FOREST_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_RANDOM_FOREST_REGRESSION || config.WI_ML_RANDOM_FOREST_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_SUPERVISE_SOM":
-                host = process.env.WI_ML_SUPERVISE_SOM || config.WI_ML_SUPERVISE_SOM || "127.0.0.1:3000";
+                host = process.env.WI_ML_SUPERVISE_SOM || config.WI_ML_SUPERVISE_SOM || "unknown.i2g.cloud";
                 break;
             case "WI_ML_SVM_REGRESSION":
-                host = process.env.WI_ML_SVM_REGRESSION || config.WI_ML_SVM_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_SVM_REGRESSION || config.WI_ML_SVM_REGRESSION || "unknown.i2g.cloud";
                 break;
             case "WI_ML_UNSUPERVISE_SOM":
-                host = process.env.WI_ML_UNSUPERVISE_SOM || config.WI_ML_UNSUPERVISE_SOM || "127.0.0.1:3000";
+                host = process.env.WI_ML_UNSUPERVISE_SOM || config.WI_ML_UNSUPERVISE_SOM || "unknown.i2g.cloud";
                 break;
             case "WI_ML_XGBOOST_REGRESSION":
-                host = process.env.WI_ML_XGBOOST_REGRESSION || config.WI_ML_XGBOOST_REGRESSION || "127.0.0.1:3000";
+                host = process.env.WI_ML_XGBOOST_REGRESSION || config.WI_ML_XGBOOST_REGRESSION || "unknown.i2g.cloud";
                 break;
             default:
                 return next();
         }
         delete req.headers['service'];
-        console.log("Forwarded ", req.originalUrl, " to ", host)
+        console.log("Forwarded ", req.originalUrl, " to ", host);
         let container = new ScopeContainer(req, res, next, host, userOptions);
 
         filterUserRequest(container)
