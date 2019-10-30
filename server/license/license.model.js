@@ -40,7 +40,6 @@ function newLicensePackage(payload, cb) {
 function editLicensePackage(payload, cb) {
     LicensePackage.findByPk(payload.idLicensePackage).then(ls => {
         if (ls) {
-            // console.log(payload.i2g_feature);
             let featureApis = payload.i2g_feature.map(f => f.idFeature);
             Object.assign(ls, payload).save().then(l => {
                 l.setI2g_features(featureApis).then(() => {
@@ -94,6 +93,7 @@ function deleteFeature(payload, cb) {
         }
     })
 }
+
 
 module.exports = {
     getUserLicense,

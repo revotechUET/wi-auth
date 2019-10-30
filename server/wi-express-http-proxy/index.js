@@ -23,6 +23,7 @@ let resolveProxyHost = require('./app/steps/resolveProxyHost');
 let resolveProxyReqPath = require('./app/steps/resolveProxyReqPath');
 let sendProxyRequest = require('./app/steps/sendProxyRequest');
 let sendUserRes = require('./app/steps/sendUserRes');
+let checkLicensePermission = require('../license/check-license-permission');
 
 const isMultipartRequest = function (req) {
     let contentTypeHeader = req.headers['content-type'];
@@ -122,40 +123,45 @@ module.exports = function proxy() {
                 return next();
         }
         delete req.headers['service'];
-        console.log("Forwarded ", req.originalUrl, " to ", host);
-        let container = new ScopeContainer(req, res, next, host, userOptions);
+        checkLicensePermission(req, service).then(() => {
+            console.log("Forwarded ", req.originalUrl, " to ", host);
+            let container = new ScopeContainer(req, res, next, host, userOptions);
 
-        filterUserRequest(container)
-            .then(buildProxyReq)
-            .then(resolveProxyHost)
-            .then(decorateProxyReqOpts)
-            .then(resolveProxyReqPath)
-            .then(decorateProxyReqBody)
-            .then(prepareProxyReq)
-            .then(sendProxyRequest)
-            .then(maybeSkipToNextHandler)
-            .then(copyProxyResHeadersToUserRes)
-            .then(decorateUserResHeaders)
-            .then(decorateUserRes)
-            .then(sendUserRes)
-            .catch(function (err) {
-                // I sometimes reject without an error to shortcircuit the remaining
-                // steps and return control to the host application.
+            filterUserRequest(container)
+                .then(buildProxyReq)
+                .then(resolveProxyHost)
+                .then(decorateProxyReqOpts)
+                .then(resolveProxyReqPath)
+                .then(decorateProxyReqBody)
+                .then(prepareProxyReq)
+                .then(sendProxyRequest)
+                .then(maybeSkipToNextHandler)
+                .then(copyProxyResHeadersToUserRes)
+                .then(decorateUserResHeaders)
+                .then(decorateUserRes)
+                .then(sendUserRes)
+                .catch(function (err) {
+                    // I sometimes reject without an error to shortcircuit the remaining
+                    // steps and return control to the host application.
 
-                if (err) {
-                    let resolver = (container.options.proxyErrorHandler) ?
-                        container.options.proxyErrorHandler :
-                        handleProxyErrors;
-                    if (err.code === "ECONNREFUSED") {
-                        res.send(ResponseJSON(512, "Our Service Temporarily Unavailable", "Our Service Temporarily Unavailable"));
-                        res.end();
+                    if (err) {
+                        let resolver = (container.options.proxyErrorHandler) ?
+                            container.options.proxyErrorHandler :
+                            handleProxyErrors;
+                        if (err.code === "ECONNREFUSED") {
+                            res.send(ResponseJSON(512, "Our Service Temporarily Unavailable", "Our Service Temporarily Unavailable"));
+                            res.end();
+                        } else {
+                            resolver(err, res, next);
+                        }
                     } else {
-                        resolver(err, res, next);
+                        next();
                     }
-                } else {
-                    next();
-                }
-            });
+                });
+        }).catch(() => {
+            res.send(ResponseJSON(512, "Your license is not allowed!", "Your license is not allowed!"));
+            res.end();
+        });
     };
 };
 
