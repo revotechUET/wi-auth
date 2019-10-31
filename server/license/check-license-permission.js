@@ -29,7 +29,7 @@ async function getPermFromDatabase(decoded) {
 module.exports = function (req, service) {
     return new Promise((async (resolve, reject) => {
         let decoded = req.decoded;
-        if (!decoded) return reject();
+        if (!decoded) return resolve();
         let requestKey = service === "WI_BACKEND" ? "BACKEND_API|" + req.path : "SERVICE|" + service;
         redisCLient.hget(decoded.username + ':license', 'expiredAt', async (err, value) => {
             if (value && (Date.now() - parseInt(value)) < 1000 * 60 * 15) {
