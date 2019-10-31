@@ -159,7 +159,7 @@ module.exports = function proxy() {
                     }
                 });
         }).catch(() => {
-            res.send(ResponseJSON(512, "Your license is not allowed!", "Your license is not allowed!"));
+            res.send(ResponseJSON(512, "Your license is not valid for this feature!", "Your license is not valid for this feature"));
             res.end();
         });
     };
