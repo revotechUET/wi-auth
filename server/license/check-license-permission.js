@@ -31,6 +31,7 @@ module.exports = function (req, service) {
         let decoded = req.decoded;
         if (!decoded) return resolve();
         let requestKey = service === "WI_BACKEND" ? "BACKEND_API|" + req.path : "SERVICE|" + service;
+        requestKey = requestKey.endsWith('/') ? requestKey.substring(0, requestKey.length - 1) : requestKey;
         redisCLient.hget(decoded.username + ':license', 'expiredAt', async (err, value) => {
             if (value && (Date.now() - parseInt(value)) < 1000 * 60 * 15) {
                 redisCLient.hget(decoded.username + ':license', requestKey, (err, value) => {
