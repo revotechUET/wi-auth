@@ -119,6 +119,9 @@ module.exports = function proxy() {
             case "WI_ML_XGBOOST_REGRESSION":
                 host = process.env.WI_ML_XGBOOST_REGRESSION || config.WI_ML_XGBOOST_REGRESSION || "unknown.i2g.cloud";
                 break;
+            case "WI_FILE_PREVIEW":
+                host = process.env.WI_FILE_PREVIEW || config.WI_FILE_PREVIEW || "unknown.i2g.cloud";
+                break;
             default:
                 return next();
         }
