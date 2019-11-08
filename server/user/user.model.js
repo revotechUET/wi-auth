@@ -18,65 +18,65 @@ function createUser(userInfo, done) {
     userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
     userInfo.password = md5(userInfo.password);
     User.create(userInfo).then(user => {
-        if (user.role === 3) {
-            Company.findByPk(user.idCompany).then(company => {
-                if (company) {
-                    let storage_location = company.storage_location;
-                    let data = {
-                        username: user.username,
-                        whoami: "wi-authenticate",
-                        role: user.role,
-                        company: company.name
-                    };
-                    let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
-                    let create_database_options = {
-                        method: 'POST',
-                        url: (process.env.AUTH_WI_BACKEND || config.Service.backend_service) + '/database/update',
-                        headers: {
-                            'Cache-Control': 'no-cache',
-                            'Authorization': token,
-                            'Content-Type': 'application/json'
-                        },
-                        body: {username: user.username},
-                        json: true,
-                        strictSSL: false
-                    };
-                    let new_project_options = {
-                        method: 'POST',
-                        url: (process.env.AUTH_WI_BACKEND || config.Service.backend_service) + '/project/new',
-                        headers: {
-                            'Cache-Control': 'no-cache',
-                            'Authorization': token,
-                            'Content-Type': 'application/json'
-                        },
-                        body: {
-                            company: company.name,
-                            department: "I2G_Storage_DB_Project",
-                            description: "I2G_Storage_DB_Project",
-                            name: company.name + "_" + "Storage_Project",
-                            storage_location: company.storage_location
-                        },
-                        json: true,
-                        strictSSL: false
-                    };
-                    request(create_database_options, function (error, response, body) {
-                        if (error) {
-                            console.log(error);
-                        } else {
-                            setTimeout(() => {
-                                request(new_project_options, (error, response, body) => {
-                                    if (error) console.log(error);
-                                })
-                            }, 3000)
-                            console.log(body.content);
-                        }
-                        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
-                    });
-                }
-            })
-        } else {
-            done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
-        }
+        done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+        // if (user.role === 3) {
+        //     Company.findByPk(user.idCompany).then(company => {
+        //         if (company) {
+        //             let storage_location = company.storage_location;
+        //             let data = {
+        //                 username: user.username,
+        //                 whoami: "wi-authenticate",
+        //                 role: user.role,
+        //                 company: company.name
+        //             };
+        //             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
+        //             let create_database_options = {
+        //                 method: 'POST',
+        //                 url: (process.env.AUTH_WI_BACKEND || config.Service.backend_service) + '/database/update',
+        //                 headers: {
+        //                     'Cache-Control': 'no-cache',
+        //                     'Authorization': token,
+        //                     'Content-Type': 'application/json'
+        //                 },
+        //                 body: {username: user.username},
+        //                 json: true,
+        //                 strictSSL: false
+        //             };
+        //             let new_project_options = {
+        //                 method: 'POST',
+        //                 url: (process.env.AUTH_WI_BACKEND || config.Service.backend_service) + '/project/new',
+        //                 headers: {
+        //                     'Cache-Control': 'no-cache',
+        //                     'Authorization': token,
+        //                     'Content-Type': 'application/json'
+        //                 },
+        //                 body: {
+        //                     company: company.name,
+        //                     department: "I2G_Storage_DB_Project",
+        //                     description: "I2G_Storage_DB_Project",
+        //                     name: company.name + "_" + "Storage_Project",
+        //                     storage_location: company.storage_location
+        //                 },
+        //                 json: true,
+        //                 strictSSL: false
+        //             };
+        //             request(create_database_options, function (error, response, body) {
+        //                 if (error) {
+        //                     console.log(error);
+        //                 } else {
+        //                     setTimeout(() => {
+        //                         request(new_project_options, (error, response, body) => {
+        //                             if (error) console.log(error);
+        //                         })
+        //                     }, 3000)
+        //                     console.log(body.content);
+        //                 }
+        //                 done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+        //             });
+        //         }
+        //     })
+        // } else {
+        // }
     }).catch(err => {
         done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
     });
