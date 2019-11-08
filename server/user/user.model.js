@@ -23,7 +23,7 @@ function createUser(userInfo, done) {
                 username: user.username,
                 whoami: "wi-authenticate",
                 role: user.role,
-                company: company.name
+                company: "company.name"
             };
             let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
             let create_database_options = {
