@@ -41,7 +41,7 @@ router.post('/company/users', (req, res)=>{
     let company = req.decoded.company;
     let role = req.decoded.role;
 
-    if (role == 2) {
+    if (role == 0) {
         //this is admin
         userModel.listUser(req.body, function (status) {
             res.send(status);
