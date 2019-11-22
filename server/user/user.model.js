@@ -234,7 +234,7 @@ function listUser(userInfo, done, decoded) {
             }).then(user => {
                 models.User.findAll({
                     // where: {idCompany: user.idCompany, role: {[Op.gte]: 1}},
-                    where: {idCompany: user.idCompany, role: {[Op.gte]: 1}},
+                    where: {idCompany: user.idCompany},
                     include: [{model: LicensePackage}, {model: Company}, {model: Group}]
                 }).then(gs => {
                     done(ResponseJSON(200, "Done", gs));
