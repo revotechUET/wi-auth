@@ -1,20 +1,19 @@
 {
   "Database": {
     "dialect": "mysql",
-    // "postgres" for PostgreSql, "mysql" for MySql, "sqlite" for sqLite
     "host": "localhost",
     "port": 3306,
     "user": "root",
     "password": "mypassword",
     "logging": false,
-    //Logging all database query if is set "true"
     "storage": "/tmp/wi_backend.sqlite",
-    //Path to database.sqlite (used for sqlite only)
-    "dbName": "bmq_database"
+    "dbName": "wi_users"
   },
   "Application": {
     "port": 2999
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379
   }
 }
-
-// should ignore from git
