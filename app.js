@@ -23,6 +23,7 @@ let sharedProjectRouter = require('./server/shared-project/shared-project.router
 let companyRouter = require('./server/company/company.router');
 let userLanguageRouter = require('./server/language');
 let licenseRouter = require('./server/license/license.router');
+let keysRouter = require('./server/keys/keys.router');
 let http = require('http').Server(app);
 
 app.get('/', async function (req, res) {
@@ -47,6 +48,7 @@ app.use('/', groupRouter);
 app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 app.use('/', licenseRouter);
+app.use('/', keysRouter);
 http.listen(process.env.AUTH_PORT || config.port, function () {
     console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
 });
