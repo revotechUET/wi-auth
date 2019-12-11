@@ -32,7 +32,7 @@ router.post('/company/edit', function (req, res) {
 });
 
 router.post('/company/list', function (req, res) {
-    companyModel.listCompany(req.body, function (status) {
+    companyModel.listCompany(req, function (status) {
         res.send(status);
     });
 });
