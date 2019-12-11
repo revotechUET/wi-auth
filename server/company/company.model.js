@@ -60,8 +60,8 @@ function infoCompany(payload, callback) {
 
 function listCompany(payload, callback) {
     let resp = [];
-    let roleUser = (payload.decoded || {}).role;
-    let companyUser = (payload.decoded || "").company;
+    let roleUser = payload.decoded.role;
+    let companyUser = payload.decoded.company;
     let condition = {};
     if (roleUser < 2) {
         condition.where = {name: companyUser}
