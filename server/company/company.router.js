@@ -32,7 +32,8 @@ router.post('/company/edit', function (req, res) {
 });
 
 router.post('/company/list', function (req, res) {
-    companyModel.listCompany(req, function (status) {
+    req.body = req.decoded;
+    companyModel.listCompany(req.body, function (status) {
         res.send(status);
     });
 });
