@@ -87,6 +87,9 @@ router.post('/login', function (req, res) {
     } else {
         User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
             .then(function (user) {
+                if (!user) {
+                    return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
+                }
                 if (req.body.whoami === "data-administrator-service" && ('' + parseInt(user.role) !== "3"))
                     return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
                 if (!user) {
