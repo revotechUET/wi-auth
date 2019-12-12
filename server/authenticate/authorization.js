@@ -1,7 +1,6 @@
 module.exports = {
     systemAdminOnly: function () {
         return function (req, res, next) {
-            let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
             if (req.decoded.role > 1) {
                 next();
             } else {
@@ -15,7 +14,6 @@ module.exports = {
     },
     atLeastCompanyAdmin: function() {
         return function (req, res, next) {
-            let token = req.body.token || req.query.token || req.header['x-access-token'] || req.get('Authorization');
             if (req.decoded.role >= 1) {
                 next();
             } else {

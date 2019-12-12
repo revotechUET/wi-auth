@@ -8,7 +8,7 @@ let ResponseJSON = require('../response');
 let userModel = require('./../user/user.model');
 let author = require('./../authenticate/authorization');
 
-router.post(author.systemAdminOnly(), '/company/new', function (req, res) {
+router.post('/company/new', author.systemAdminOnly(), function (req, res) {
     companyModel.createCompany(req.body, function (status) {
         res.send(status);
     });
@@ -20,13 +20,13 @@ router.post('/company/info', function (req, res) {
     });
 });
 
-router.post(author.systemAdminOnly(), '/company/delete', function (req, res) {
+router.post('/company/delete', author.systemAdminOnly(), function (req, res) {
     companyModel.deleteCompany(req.body, function (status) {
         res.send(status);
     });
 });
 
-router.post(author.atLeastCompanyAdmin(), '/company/edit', function (req, res) {
+router.post('/company/edit', author.atLeastCompanyAdmin(), function (req, res) {
     companyModel.editCompany(req.body, function (status) {
         res.send(status);
     });
