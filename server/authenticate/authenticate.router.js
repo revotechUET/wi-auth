@@ -92,45 +92,41 @@ router.post('/login', function (req, res) {
                 }
                 if (req.body.whoami === "data-administrator-service" && ('' + parseInt(user.role) !== "3"))
                     return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
-                if (!user) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
+                if (user.password !== req.body.password) {
+                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password is not correct."));
                 } else {
-                    if (user.password !== req.body.password) {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password is not correct."));
-                    } else {
-                        if (user.status === "Inactive") {
-                            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
-                        } else if (user.status === "Active") {
-                            let data = {
-                                username: user.username,
-                                whoami: req.body.whoami,
-                                role: user.role,
-                                company: user.company.name
-                            };
-                            let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
-                            let response = {};
-                            response.token = token;
-                            if (req.body.whoami === 'main-service') {
-                                refreshTokenModel.clearTokenByUser(user.idUser, function () {
-                                    refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
-                                        response.refresh_token = refreshToken;
-                                        response.company = user.company;
-                                        redisClient.del(user.username + ":license");
-                                        return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                                    });
+                    if (user.status === "Inactive") {
+                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                    } else if (user.status === "Active") {
+                        let data = {
+                            username: user.username,
+                            whoami: req.body.whoami,
+                            role: user.role,
+                            company: user.company.name
+                        };
+                        let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
+                        let response = {};
+                        response.token = token;
+                        if (req.body.whoami === 'main-service') {
+                            refreshTokenModel.clearTokenByUser(user.idUser, function () {
+                                refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
+                                    response.refresh_token = refreshToken;
+                                    response.company = user.company;
+                                    redisClient.del(user.username + ":license");
+                                    return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                                 });
-                            } else {
-                                response.user = {
-                                    username: user.username,
-                                    role: user.role,
-                                    idCompany: user.idCompany
-                                };
-                                redisClient.del(user.username + ":license");
-                                return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                            }
+                            });
                         } else {
-                            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+                            response.user = {
+                                username: user.username,
+                                role: user.role,
+                                idCompany: user.idCompany
+                            };
+                            redisClient.del(user.username + ":license");
+                            return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
                         }
+                    } else {
+                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
                     }
                 }
             });
