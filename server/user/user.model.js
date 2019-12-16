@@ -20,10 +20,11 @@ async function createUser(userInfo, done) {
     let role = (userInfo.decoded || {}).role;
     if (role > 0) {
         if (userInfo.decoded.company) {
-            let rs = await Company.findOne({name: company});
+            let rs = await Company.findOne({name: userInfo.decoded.compan});
             userInfo.idCompany = rs.idCompany;
         }
     }
+    delete userInfo.decoded;
     User.create(userInfo).then(user => {
         if (parseInt(user.role) === 3) {
             let data = {
