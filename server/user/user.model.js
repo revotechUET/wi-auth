@@ -97,7 +97,7 @@ function editUser(userInfo, done) {
                 userInfo.password = md5(userInfo.password);
             }
 
-            if (userInfo.idCompany !== user.idCompany) {
+            if (userInfo.idCompany && userInfo.idCompany !== user.idCompany) {
                 //remove all group allow in that user
                 try {
                     const rs = await models.UserGroupPermission.destroy({
@@ -116,13 +116,11 @@ function editUser(userInfo, done) {
                     if (!group) {
                         return done(responseJSON(512, "No group found by id"));
                     }
-
                     await group.addUser(userInfo.idUser, {through: {permission: 2}});
                 } catch (err) {
                     return done(responseJSON(512, err, err));
                 }
             }
-
 
             Object.assign(user, userInfo).save().then(rs => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", rs));
