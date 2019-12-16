@@ -60,13 +60,7 @@ function infoCompany(payload, callback) {
 
 function listCompany(payload, callback) {
     let resp = [];
-    let condition = {};
-    if (payload.decoded.role > 0) {
-        if (payload.decoded.company) {
-            condition.name = payload.decoded.company;
-        }
-    }
-    models.Company.findAll(condition).then(comps => {
+    models.Company.findAll().then(comps => {
         async.each(comps, function (comp, next) {
             comp = comp.toJSON();
             models.User.findAndCountAll({where: {idCompany: comp.idCompany, status: "Active"}}).then(users => {
