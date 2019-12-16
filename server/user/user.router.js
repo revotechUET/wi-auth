@@ -17,6 +17,7 @@ router.post('/user/list-by-company', (req, res) => {
 });
 
 router.post('/user/new', function (req, res) {
+	req.body.decoded = req.decoded;
 	model.createUser(req.body, function (status) {
 		res.send(status);
 	});

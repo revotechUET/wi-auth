@@ -14,9 +14,16 @@ let config = require('config');
 let jwt = require('jsonwebtoken');
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 
-function createUser(userInfo, done) {
+async function createUser(userInfo, done) {
     userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
     userInfo.password = md5(userInfo.password);
+    let role = (userInfo.decoded || {}).role;
+    if (role > 0) {
+        if (userInfo.company) {
+            let rs = await Company.findOne({name: company});
+            userInfo.idCompany = rs.idCompany;
+        }
+    }
     User.create(userInfo).then(user => {
         if (parseInt(user.role) === 3) {
             let data = {
