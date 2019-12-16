@@ -19,7 +19,7 @@ async function createUser(userInfo, done) {
     userInfo.password = md5(userInfo.password);
     let role = (userInfo.decoded || {}).role;
     if (role > 0) {
-        if (userInfo.company) {
+        if (userInfo.decoded.company) {
             let rs = await Company.findOne({name: company});
             userInfo.idCompany = rs.idCompany;
         }
