@@ -16,6 +16,7 @@ function getUserLicense(payload, cb, username) {
             break;
         case "button":
             options.include = { model: LicensePackage, include: { model: Feature, include: { model: Api }, where: { type: 'BUTTON' } } };
+            break;
         default:
             options.include = {model: LicensePackage, include: {model: Feature, include: {model: Api}}};
             break;
