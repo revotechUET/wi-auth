@@ -4,11 +4,17 @@ const file = path.join(__dirname, 'feature_api.xlsx');
 const Api = require('../models-master').I2gApi;
 module.exports = async function () {
     let rows = xlsx.getRows(file, 'feature_api').slice(2);
-    for (let i = 0; i < rows.length; i++) {
+    for (let i = 0; i < rows.length; i++) {   
         let row = rows[i];
         let route = await Api.findOrCreate({
             where: {
-                idI2gApi: row[0]
+                idI2gApi: row[0],
+                route: row[1],
+                type: row[2]
+            }, defaults: {
+                idI2gApi: row[0],
+                route: row[1],
+                type: row[2]
             }
         });
         await route[0].update({
