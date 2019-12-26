@@ -11,7 +11,7 @@ module.exports = async function () {
                 idI2gApi: row[0]
             }
         });
-        route.update({
+        await route[0].update({
             route: row[1],
             type: row[2],
         });
