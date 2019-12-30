@@ -63,6 +63,9 @@ function addToGroup(data, done) {
                                 idCompany: data.idCompany
                             }
                         }).then(gr => {
+                            if (data.username.indexOf("su_") == 0) {
+                                data.username.splice(0,3);
+                            }
                             Model.User.findOne({
                                 where: {
                                     idCompany: data.idCompany,
