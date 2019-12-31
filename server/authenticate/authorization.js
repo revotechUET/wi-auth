@@ -1,7 +1,7 @@
 module.exports = {
     systemAdminOnly: function () {
         return function (req, res, next) {
-            if (req.decoded.role > 1) {
+            if (req.decoded.role < 1) {
                 next();
             } else {
                 return res.status(401).send({
