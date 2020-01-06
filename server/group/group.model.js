@@ -4,6 +4,7 @@ let async = require('async');
 
 async function createNewGroup(data, done, username) {
     let user = await Model.User.findOne({where: {username: username}});
+    if (user.role == 1) data.idCompany = user.idCompany;
     Model.Group.create(data).then(group => {
         group.addUser(user, {through: {permission: 1}});
         done(responseJSON(200, "Successfull", group));
