@@ -100,7 +100,8 @@ router.post('/company/get-licenses-left', async (req,res) => {
             return {idLicensePackage: e.idLicensePackage, value: e.company_license.value}
         });
         for (let i = 0; i < licenses.length; i++) {
-            licenses[i].dataValues.left = licensesInCompany.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage).length 
+            let arr = licensesInCompany.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage);
+            licenses[i].dataValues.left = (arr.length == 0 ? 0 : arr[0].value)
                                 - users.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage).length;                            
         }
         res.json(ResponseJSON(200, 'Successfully', licenses));
