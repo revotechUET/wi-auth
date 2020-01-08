@@ -65,8 +65,48 @@ router.post('/company/users', (req, res)=>{
     });
 });
 
-router.post('/company/remove-one-license', async (req, res)=>{
-    (await Company.findByPk(1)).setLicense_package(1, {through: {value: 2}});
+router.post('/company/get-licenses-left', async (req,res) => {
+    let companyName = req.decoded.company;
+    let role = req.decoded.role;
+
+    if (role == 0) {
+        try {
+            let licenses = (await models.LicensePackage.findAll({where: {}}));
+            for (let i = 0; i < licenses.length; i++) {
+                licenses[i].dataValues.left = 999;                            
+            }
+            res.json(ResponseJSON(200, 'Successfully', licenses));
+            return;
+        } catch (e) {
+            res.json(ResponseJSON(512, e.message, {}));
+            return;
+        }
+        
+    }
+
+    try {
+        let company = await Company.findOne({
+            where: { name: companyName },
+            include: {
+                model: models.LicensePackage,
+                attributes: ['idLicensePackage', 'name', 'description'],
+                through: { attributes: ['value'] }
+            },
+            attributes: ['idCompany', 'name']
+        });
+        let licenses = (await models.LicensePackage.findAll({where: {}}));
+        let users = (await models.User.findAll({where: {idCompany: req.body.idCompany}})).map((e)=>e.idLicensePackage);
+        let licensesInCompany = company.license_packages.map((e)=>{
+            return {idLicensePackage: e.idLicensePackage, value: e.company_license.value}
+        });
+        for (let i = 0; i < licenses.length; i++) {
+            licenses[i].dataValues.left = licensesInCompany.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage).length 
+                                - users.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage).length;                            
+        }
+        res.json(ResponseJSON(200, 'Successfully', licenses));
+    } catch (e) {
+        res.json(ResponseJSON(512, e.message, {}));
+    }
     
 });
 
