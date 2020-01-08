@@ -125,9 +125,12 @@ router.post('/company/get-licenses', async (req, res)=>{
         let licensesInCompany = company.license_packages.map((e)=>{
             return {idLicensePackage: e.idLicensePackage, value: e.company_license.value}
         });
+        let users = (await models.User.findAll({where: {idCompany: req.body.idCompany}}));
         for (let i = 0; i < licenses.length; i++) {
             let arr = licensesInCompany.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage);
             licenses[i].dataValues.value = (arr.length == 0 ? 0 : arr[0].value);
+            licenses[i].dataValues.left = (arr.length == 0 ? 0 : arr[0].value)
+                                - users.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage).length;   
         }
         res.json(ResponseJSON(200, 'Successfully', licenses));
     } catch (e) {
