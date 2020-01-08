@@ -95,7 +95,7 @@ router.post('/company/get-licenses-left', async (req,res) => {
             attributes: ['idCompany', 'name']
         });
         let licenses = (await models.LicensePackage.findAll({where: {}}));
-        let users = (await models.User.findAll({where: {idCompany: req.body.idCompany}})).map((e)=>e.idLicensePackage);
+        let users = (await models.User.findAll({where: {idCompany: req.body.idCompany}}));
         let licensesInCompany = company.license_packages.map((e)=>{
             return {idLicensePackage: e.idLicensePackage, value: e.company_license.value}
         });
