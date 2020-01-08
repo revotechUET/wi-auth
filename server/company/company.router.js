@@ -65,4 +65,20 @@ router.post('/company/users', (req, res)=>{
     });
 });
 
+router.post('/company/remove-one-license', async (req, res)=>{
+    (await Company.findByPk(1)).setLicense_package(1, {through: {value: 2}});
+    
+});
+
+router.post('/company/get-licenses', (req, res)=>{
+    Company.findByPk(1, {include: {model: models.LicensePackage, 
+        attributes: ['idLicensePackage','name', 'description'], through: {attributes: ['value']}}, attributes:['idCompany', 'name']})
+    .then((rs)=>{
+        res.json(ResponseJSON(200, 'Successfully', rs));
+    })
+    .catch((e)=>{
+        res.json(ResponseJSON(512, e.message, {}));
+    });
+});
+
 module.exports = router;

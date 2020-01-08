@@ -30,6 +30,7 @@ router.post('/user/info', function (req, res) {
 });
 
 router.post('/user/edit', function (req, res) {
+	req.body.decoded = req.decoded;
 	model.editUser(req.body, function (status) {
 		res.send(status);
 	});

@@ -34,7 +34,8 @@ let models = [
     'SharedProjectGroup',
     'User',
     'UserGroupPermission',
-    'UserLanguage'
+    'UserLanguage',
+    'CompanyLicense'
 ];
 models.forEach(function (model) {
     module.exports[model] = sequelize.import(__dirname + '/' + model);
@@ -101,6 +102,16 @@ models.forEach(function (model) {
         through: 'i2g_feature_i2g_api',
         timestamps: false,
         foreignKey: 'idApi'
+    });
+    m.Company.belongsToMany(m.LicensePackage, {
+        through: 'company_license',
+        timestamps: false,
+        foreignKey: 'idCompany'
+    });
+    m.LicensePackage.belongsToMany(m.Company, {
+        through: 'company_license',
+        timestamps: false,
+        foreignKey: 'idLicensePackage'
     });
 })(module.exports);
 module.exports.sequelize = sequelize;

@@ -18,13 +18,48 @@ async function createUser(userInfo, done) {
     userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
     userInfo.password = md5(userInfo.password);
     let role = (userInfo.decoded || {}).role;
+    let company = null;
     if (role > 0) {
-        if (userInfo.decoded.company) {
-            let rs = await Company.findOne({name: userInfo.decoded.compan});
-            userInfo.idCompany = rs.idCompany;
+        try {
+            if (userInfo.decoded.company) {
+                company = await Company.findOne({
+                    where: { name: "I2G" },
+                    include: {
+                        model: models.LicensePackage,
+                        attributes: ['idLicensePackage', 'name', 'description'],
+                        through: { attributes: ['value'] }
+                    },
+                    attributes: ['idCompany', 'name']
+                });
+                userInfo.idCompany = company.idCompany;
+                
+                let idx = company.license_packages.findIndex((e)=>e.idLicensePackage == userInfo.idLicensePackage);
+                if (idx < 0) {
+                    done(ResponseJSON(512, "No license package left", {}));
+                    return;
+                }
+                let value = company.license_packages[idx].company_license.value;
+
+                let count = 0;
+                let users = (await User.findAll({where: {idCompany: company.idCompany}})).map(e=>e.idLicensePackage);
+                for (let i = 0; i < users.length; i++) {
+                    if (users[i] == userInfo.idLicensePackage) count++;
+                }
+                if (count + 1 > value) {
+                    done(ResponseJSON(512, "No license package left", {}));
+                    return;
+                }
+            }
+        } catch (e) {
+            done(ResponseJSON(512, e.message, {}));
+            return;
         }
     }
     delete userInfo.decoded;
+    doUserCreate(userInfo, done);
+}
+
+function doUserCreate(userInfo, done) {
     User.create(userInfo).then(user => {
         if (parseInt(user.role) === 3) {
             let data = {
@@ -33,7 +68,7 @@ async function createUser(userInfo, done) {
                 role: user.role,
                 company: "company.name"
             };
-            let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
+            let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
             let create_database_options = {
                 method: 'POST',
                 url: (process.env.AUTH_WI_BACKEND || config.Service.backend_service) + '/database/update',
@@ -42,7 +77,7 @@ async function createUser(userInfo, done) {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 },
-                body: {username: user.username},
+                body: { username: user.username },
                 json: true,
                 strictSSL: false
             };
@@ -95,10 +130,47 @@ function infoUser(userInfo, done) {
 
 // }
 
-function editUser(userInfo, done) {
-    // console.log(userInfo);
-    // userInfo.password = md5(userInfo.password);
-    if (userInfo.password === "") delete userInfo.password;
+async function editUser(userInfo, done) {
+    userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
+    userInfo.password = md5(userInfo.password);
+    let role = (userInfo.decoded || {}).role;
+    let company = null;
+    if (role > 0) {
+        try {
+            if (userInfo.decoded.company) {
+                company = await Company.findOne({
+                    where: { name: "I2G" },
+                    include: {
+                        model: models.LicensePackage,
+                        attributes: ['idLicensePackage', 'name', 'description'],
+                        through: { attributes: ['value'] }
+                    },
+                    attributes: ['idCompany', 'name']
+                });
+                userInfo.idCompany = company.idCompany;
+                
+                let idx = company.license_packages.findIndex((e)=>e.idLicensePackage == userInfo.idLicensePackage);
+                if (idx < 0) {
+                    done(ResponseJSON(512, "No license package left", {}));
+                    return;
+                }
+                let value = company.license_packages[idx].company_license.value;
+
+                let count = 0;
+                let users = (await User.findAll({where: {idCompany: company.idCompany}})).map(e=>e.idLicensePackage);
+                for (let i = 0; i < users.length; i++) {
+                    if (users[i] == userInfo.idLicensePackage) count++;
+                }
+                if (count + 1 > value) {
+                    done(ResponseJSON(512, "No license package left", {}));
+                    return;
+                }
+            }
+        } catch (e) {
+            done(ResponseJSON(512, e.message, {}));
+            return;
+        }
+    }
     User.findByPk(userInfo.idUser).then(async user => {
         if (user) {
             if (userInfo.password) {
@@ -124,7 +196,7 @@ function editUser(userInfo, done) {
                     if (!group) {
                         return done(responseJSON(512, "No group found by id"));
                     }
-                    await group.addUser(userInfo.idUser, {through: {permission: 2}});
+                    await group.addUser(userInfo.idUser, { through: { permission: 2 } });
                 } catch (err) {
                     return done(responseJSON(512, err, err));
                 }
@@ -146,7 +218,7 @@ function editUser(userInfo, done) {
 
 function checkLicense(idCompany, cb) {
     console.log("Active user of compnay ", idCompany);
-    User.findAll({where: {idCompany: idCompany, status: "Active"}}).then(users => {
+    User.findAll({ where: { idCompany: idCompany, status: "Active" } }).then(users => {
         let activeUsers = users.length;
         console.log("Total actived user ", activeUsers);
         Company.findByPk(idCompany).then(company => {
@@ -192,18 +264,18 @@ function listUser(userInfo, done, decoded) {
         userInfo.owner = userInfo.owner.substring(3);
     }
     if (decoded.whoami === 'main-service') {
-        let conditions = userInfo.idCompany ? {idCompany: userInfo.idCompany} : {};
-        User.findAll({where: conditions, include: [{model: LicensePackage}, {model: Company}]}).then(users => {
+        let conditions = userInfo.idCompany ? { idCompany: userInfo.idCompany } : {};
+        User.findAll({ where: conditions, include: [{ model: LicensePackage }, { model: Company }] }).then(users => {
             if (userInfo.project_name && userInfo.owner) {
                 let response = [];
                 let user = users.find(u => u.username === userInfo.owner);
                 SharedProject.findOne({
-                    where: {project_name: userInfo.project_name, idOwner: user.idUser},
-                    include: {model: models.Group}
+                    where: { project_name: userInfo.project_name, idOwner: user.idUser },
+                    include: { model: models.Group }
                 }).then(sp => {
                     if (sp) {
                         async.each(sp.groups, function (group, next) {
-                            models.Group.findByPk(group.idGroup, {include: {model: models.User}}).then(g => {
+                            models.Group.findByPk(group.idGroup, { include: { model: models.User } }).then(g => {
                                 async.each(g.users, function (u, nextU) {
                                     let find = response.find(_u => _u.username === u.username);
                                     if (!find) response.push(u);
@@ -229,27 +301,27 @@ function listUser(userInfo, done, decoded) {
         })
     } else {
         if (decoded.role === 0) {
-            User.findAll({include: [{model: LicensePackage}, {model: Company}, {model: Group}]}).then(us => {
+            User.findAll({ include: [{ model: LicensePackage }, { model: Company }, { model: Group }] }).then(us => {
                 done(ResponseJSON(200, "Done", us));
             });
         } else if (decoded.role === 1 || parseInt(decoded.role) === 3) {
             const Op = require('sequelize').Op;
             User.findOne({
-                where: {username: decoded.username},
-                include: [{model: LicensePackage}, {model: Company}, {model: Group}]
+                where: { username: decoded.username },
+                include: [{ model: LicensePackage }, { model: Company }, { model: Group }]
             }).then(user => {
                 models.User.findAll({
                     // where: {idCompany: user.idCompany, role: {[Op.gte]: 1}},
-                    where: {idCompany: user.idCompany},
-                    include: [{model: LicensePackage}, {model: Company}, {model: Group}]
+                    where: { idCompany: user.idCompany },
+                    include: [{ model: LicensePackage }, { model: Company }, { model: Group }]
                 }).then(gs => {
                     done(ResponseJSON(200, "Done", gs));
                 });
             });
         } else if (decoded.role === 2) {
             User.findAll({
-                where: {username: decoded.username},
-                include: [{model: LicensePackage}, {model: Company}, {mode: Group}]
+                where: { username: decoded.username },
+                include: [{ model: LicensePackage }, { model: Company }, { mode: Group }]
             }).then(u => {
                 done(ResponseJSON(200, "Done", u));
             });
@@ -260,7 +332,7 @@ function listUser(userInfo, done, decoded) {
 function deleteUser(userInfo, done) {
     User.findByPk(userInfo.idUser).then(user => {
         if (user) {
-            User.destroy({where: {idUser: user.idUser}, individualHooks: true}).then(rs => {
+            User.destroy({ where: { idUser: user.idUser }, individualHooks: true }).then(rs => {
                 if (rs > 0) {
                     done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
                     // let request = require('request');
@@ -308,7 +380,7 @@ function getPermission(payload, done, username) {
         done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Need projectname"));
     } else {
         User.findOne({
-            where: {username: _user},
+            where: { username: _user },
             include: {
                 model: models.Group,
             }
@@ -317,7 +389,7 @@ function getPermission(payload, done, username) {
                 models.Group.findByPk(group.idGroup, {
                     include: {
                         model: models.SharedProject,
-                        where: {project_name: payload.project_name}
+                        where: { project_name: payload.project_name }
                     }
                 }).then(g => {
                     if (g) {
@@ -343,7 +415,7 @@ function getPermission(payload, done, username) {
 function forceLogOut(payload, done, username) {
     models.User.findByPk(payload.idUser).then(user => {
         if (user) {
-            models.RefreshToken.destroy({where: {idUser: user.idUser}}).then(() => {
+            models.RefreshToken.destroy({ where: { idUser: user.idUser } }).then(() => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", user));
             }).catch(err => {
                 done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
@@ -356,17 +428,17 @@ function forceLogOut(payload, done, username) {
 }
 
 async function changePassword(payload, username) {
-    const {oldPassword, newPassword} = payload;
+    const { oldPassword, newPassword } = payload;
 
     try {
-        const user = await models.User.findOne({where: {username}});
+        const user = await models.User.findOne({ where: { username } });
 
         if (!user) throw new Error('Incorrect password!');
         if (md5(oldPassword) !== user.password) throw new Error('Incorrect password!');
 
         user.password = md5(newPassword);
         const savedUser = await user.save();
-        const userObj = {...savedUser.toJSON()};
+        const userObj = { ...savedUser.toJSON() };
         delete userObj.password;
 
         return ResponseJSON(ErrorCodes.SUCCESS, "Successful", userObj);
@@ -376,14 +448,14 @@ async function changePassword(payload, username) {
 }
 
 function listUserByCompany(payload, done, username) {
-    User.findOne({where: {username: username}}).then(user => {
+    User.findOne({ where: { username: username } }).then(user => {
         if (payload.idCompany && user.role === 0) {
-            User.findAll({where: {idCompany: payload.idCompany}}).then(users => {
+            User.findAll({ where: { idCompany: payload.idCompany } }).then(users => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
             });
         } else if (user.role === 1) {
             console.log("aaa")
-            User.findAll({where: {idCompany: user.idCompany}}).then(users => {
+            User.findAll({ where: { idCompany: user.idCompany } }).then(users => {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", users));
             });
         } else {
