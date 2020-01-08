@@ -111,15 +111,28 @@ router.post('/company/get-licenses-left', async (req,res) => {
     
 });
 
-router.post('/company/get-licenses', (req, res)=>{
-    Company.findByPk(1, {include: {model: models.LicensePackage, 
-        attributes: ['idLicensePackage','name', 'description'], through: {attributes: ['value']}}, attributes:['idCompany', 'name']})
-    .then((rs)=>{
-        res.json(ResponseJSON(200, 'Successfully', rs));
-    })
-    .catch((e)=>{
+router.post('/company/get-licenses', async (req, res)=>{
+    try {
+        let company = await Company.findByPk(req.body.idCompany, {
+            include: {
+                model: models.LicensePackage,
+                attributes: ['idLicensePackage', 'name', 'description'],
+                through: { attributes: ['value'] }
+            },
+            attributes: ['idCompany', 'name']
+        });
+        let licenses = (await models.LicensePackage.findAll({where: {}}));
+        let licensesInCompany = company.license_packages.map((e)=>{
+            return {idLicensePackage: e.idLicensePackage, value: e.company_license.value}
+        });
+        for (let i = 0; i < licenses.length; i++) {
+            let arr = licensesInCompany.filter(e=>e.idLicensePackage == licenses[i].idLicensePackage);
+            licenses[i].dataValues.value = (arr.length == 0 ? 0 : arr[0].value);
+        }
+        res.json(ResponseJSON(200, 'Successfully', licenses));
+    } catch (e) {
         res.json(ResponseJSON(512, e.message, {}));
-    });
+    }
 });
 
 module.exports = router;
