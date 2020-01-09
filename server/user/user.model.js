@@ -132,7 +132,9 @@ function infoUser(userInfo, done) {
 
 async function editUser(userInfo, done) {
     userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
-    userInfo.password = md5(userInfo.password);
+    if (userInfo.password) {
+        userInfo.password = md5(userInfo.password);
+    }
     let role = (userInfo.decoded || {}).role;
     let company = null;
     if (role > 0) {
@@ -173,9 +175,6 @@ async function editUser(userInfo, done) {
     }
     User.findByPk(userInfo.idUser).then(async user => {
         if (user) {
-            if (userInfo.password) {
-                userInfo.password = md5(userInfo.password);
-            }
 
             if (userInfo.idCompany && userInfo.idCompany !== user.idCompany) {
                 //remove all group allow in that user
