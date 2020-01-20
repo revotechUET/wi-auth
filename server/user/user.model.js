@@ -141,7 +141,7 @@ async function editUser(userInfo, done) {
         try {
             if (userInfo.decoded.company) {
                 company = await Company.findOne({
-                    where: { name: "I2G" },
+                    where: { name: userInfo.decoded.company },
                     include: {
                         model: models.LicensePackage,
                         attributes: ['idLicensePackage', 'name', 'description'],
