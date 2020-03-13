@@ -9,7 +9,7 @@ async function createNewGroup(data, done, username) {
         group.addUser(user, {through: {permission: 1}});
         done(responseJSON(200, "Successfull", group));
     }).catch(err => {
-        done(responseJSON(512, {user: user, data: data}, err));
+        done(responseJSON(512, err, err));
     });
 }
 
