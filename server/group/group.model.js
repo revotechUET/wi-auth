@@ -93,12 +93,11 @@ function deleteGroup(data, done) {
 function removeUser(data, done) {
     Model.Group.findByPk(data.idGroup, {include: {model: Model.User, where: {idUser: data.idUser}}}).then(group => {
         if (group) {
-            if (group.users[0].user_group_permission.permission === 1) {
-                done(responseJSON(200, "CANT_REMOVE_OWNER", "CANT_REMOVE_OWNER"));
-            } else {
-                group.removeUser(data.idUser);
-                done(responseJSON(200, "Successfull", data));
-            }
+            // if (group.users[0].user_group_permission.permission === 1) {
+            //     done(responseJSON(200, "CANT_REMOVE_OWNER", "CANT_REMOVE_OWNER"));
+            // } else {
+            group.removeUser(data.idUser);
+            done(responseJSON(200, "Successfull", data));
         } else {
             done(responseJSON(512, "No group found by id"));
         }
