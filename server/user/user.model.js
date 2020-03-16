@@ -134,6 +134,8 @@ async function editUser(userInfo, done) {
     userInfo.username = userInfo.username ? userInfo.username.toLowerCase() : "unknown";
     if (userInfo.password) {
         userInfo.password = md5(userInfo.password);
+    } else {
+        userInfo.password = null;
     }
     let role = (userInfo.decoded || {}).role;
     let company = null;
