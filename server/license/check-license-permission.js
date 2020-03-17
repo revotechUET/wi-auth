@@ -30,6 +30,8 @@ module.exports = function (req, service) {
     return new Promise((async (resolve, reject) => {
         let decoded = req.decoded;
         if (!decoded) return resolve();
+        //pass all username path, like images hoang/9a115815/4dfa42ca/ddbd0694/a4e9bdc8/52.jpg
+        if(req.path.includes(decoded.username)) return resolve();
         let requestKey = service === "WI_BACKEND" ? "BACKEND_API|" + req.path : "SERVICE|" + service;
         requestKey = requestKey.endsWith('/') ? requestKey.substring(0, requestKey.length - 1) : requestKey;
         redisCLient.hget(decoded.username + ':license', 'expiredAt', async (err, value) => {
