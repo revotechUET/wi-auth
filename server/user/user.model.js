@@ -135,7 +135,11 @@ async function editUser(userInfo, done) {
     if (userInfo.password) {
         userInfo.password = md5(userInfo.password);
     } else {
-        userInfo.password = null;
+        try {
+            delete userInfo.password;
+        } catch (e) {
+            // donothing
+        }
     }
     let role = (userInfo.decoded || {}).role;
     let company = null;
