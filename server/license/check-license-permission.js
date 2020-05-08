@@ -1,7 +1,7 @@
 let models = require("../models-master/index");
 let User = models.User;
 let redisCLient = require('../utils/redis').redisClient;
-redisCLient.del('hoang_1:license')
+// redisCLient.del('hoang_1:license')
 // redisCLient.hmset('hoang:license', 'expiredAt', Date.now());
 // redisCLient.hget('hoang:license', 'expire1', (err, result) => {
 //     console.log(err, result)
@@ -32,6 +32,7 @@ module.exports = function (req, service) {
         if (!decoded) return resolve();
         //pass all username path, like images hoang/9a115815/4dfa42ca/ddbd0694/a4e9bdc8/52.jpg
         if(req.path.includes(decoded.username)) return resolve();
+        if(new RegExp('.*.png|jpg|jpeg|gif|img|bmp|svg|pdf|webp.*', 'i').test(req.path)) return resolve();
         let requestKey = service === "WI_BACKEND" ? "BACKEND_API|" + req.path : "SERVICE|" + service;
         requestKey = requestKey.endsWith('/') ? requestKey.substring(0, requestKey.length - 1) : requestKey;
         redisCLient.hget(decoded.username + ':license', 'expiredAt', async (err, value) => {
