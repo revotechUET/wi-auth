@@ -41,6 +41,8 @@ module.exports = function proxy() {
         let host = '127.0.0.1:2999';
         let service = req.get("service") || req.query.service;
         switch (service) {
+            case "WI_PROCESSING":
+                host = process.env.WI_PROCESSING || config.WI_PROCESSING || "unknown.i2g.cloud";
             case "WI_BACKEND":
                 host = process.env.WI_BACKEND || config.WI_BACKEND || "unknown.i2g.cloud";
                 break;
