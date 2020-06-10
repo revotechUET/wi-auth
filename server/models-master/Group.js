@@ -9,7 +9,12 @@ module.exports = function (sequelize, DataTypes) {
         name: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            unique: "name-idCompany"
+            unique: "name-idCompany",
+            validate: {
+                containsSpecialCharacter(name) {
+                    if (/[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Group name can not contain special character")
+                }
+            }
         },
         description: {
             type: DataTypes.STRING(250),
