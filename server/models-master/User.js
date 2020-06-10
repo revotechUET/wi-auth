@@ -12,7 +12,7 @@ module.exports = function (sequelize, DataTypes) {
             unique: true,
             validate: {
                 containsSpecialCharacter(name) {
-                    console.log("Validating:", name);
+                    //console.log("Validating:", name);
                     if (/[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Username can not contain special character");
                 }
             }
