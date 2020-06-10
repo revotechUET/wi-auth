@@ -9,7 +9,12 @@ module.exports = function (sequelize, DataTypes) {
         username: {
             type: DataTypes.STRING(150),
             allowNull: false,
-            unique: true
+            unique: true,
+            validate: {
+                containsSpecialCharacter(name) {
+                    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(name)) throw new Error("Username can not contain special character")
+                }
+            }
         },
         password: {
             type: DataTypes.STRING(150),
