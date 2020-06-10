@@ -12,7 +12,7 @@ module.exports = function (sequelize, DataTypes) {
             unique: true,
             validate: {
                 containsSpecialCharacter(name) {
-                    if (/[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Company name can not contain special character")
+                    if (/[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Company name can not contain special character")
                 }
             }
         },
