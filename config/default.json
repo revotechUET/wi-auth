@@ -1,16 +1,19 @@
 {
   "Database": {
     "dialect": "mysql",
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port": 3306,
     "user": "root",
-    "password": "mypassword",
+    "password": "123456",
     "logging": false,
     "storage": "/tmp/wi_backend.sqlite",
     "dbName": "wi_users"
   },
   "Application": {
-    "port": 2999
+    "port": 2999,
+    "clientSecret": "secret",
+    "clientID": "auth-code-client",
+    "grantType": "authorization_code"
   },
   "redis": {
     "host": "127.0.0.1",

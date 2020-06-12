@@ -9,6 +9,9 @@ let jwt = require('jsonwebtoken');
 let md5 = require('md5');
 let refreshTokenModel = require('./refresh-token');
 let redisClient = require('../utils/redis').redisClient;
+var axios = require('axios');
+var querystring = require('query-string');
+const config = require('../../config/default.json');
 
 // let captchaList = require('../captcha/captcha').captchaList;
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
@@ -162,4 +165,20 @@ router.post('/register', function (req, res) {
     }
 });
 
+router.post('/oauth2/token', async function(req, res){
+    let authorizationCode = req.body.code;
+    // let authorizationCode = req.query.code;
+    try {
+        let resp = await axios.post("http://localhost:4444/oauth2/token", querystring.stringify({
+            code: authorizationCode,
+            grant_type: "authorization_code",
+            client_id: "auth-code-client",
+            client_secret: "secret",
+        }));
+        console.log("-------------\n",resp.data);
+        res.send(resp.data);
+    } catch (e) {
+        res.send(e.message);
+    }
+});
 module.exports = router;

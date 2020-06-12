@@ -6,6 +6,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const serverId = getRandomHash();
 
+console.log("process env",process.env.WI_BACKEND)
 function getRandomHash() {
     const current_date = (new Date()).valueOf().toString();
     const random = Math.random().toString();

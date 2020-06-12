@@ -24,9 +24,16 @@ let resolveProxyReqPath = require('./app/steps/resolveProxyReqPath');
 let sendProxyRequest = require('./app/steps/sendProxyRequest');
 let sendUserRes = require('./app/steps/sendUserRes');
 let checkLicensePermission = require('../license/check-license-permission');
+const jwtDecode = require('jwt-decode');
+let jwt = require('jsonwebtoken');
 
 const isMultipartRequest = function (req) {
     let contentTypeHeader = req.headers['content-type'];
+    var secretKey = 'secretKey';
+    var decoded = jwtDecode(req.get('Authorization'));
+    let data = decoded.ext;
+    let newToken = jwt.sign(data, secretKey);
+    req.headers['Authorization'] = newToken;
     return contentTypeHeader && contentTypeHeader.indexOf('multipart') > -1;
 };
 
