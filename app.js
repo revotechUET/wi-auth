@@ -5,6 +5,7 @@ const config = fullConfig.Application;
 const cors = require('cors');
 const crypto = require('crypto');
 const serverId = getRandomHash();
+const passport = require('passport');
 
 function getRandomHash() {
     const current_date = (new Date()).valueOf().toString();
@@ -34,6 +35,7 @@ app.get('/', async function (req, res) {
 
 //use authenticate
 app.use(cors());
+app.use(passport.initialize());
 app.use('/', authenRouter);
 app.use('/', captchaRouter);
 app.use('/', userLanguageRouter);

