@@ -12,11 +12,7 @@ module.exports = function (sequelize, DataTypes) {
             unique: "name-idCompany",
             validate: {
                 containsSpecialCharacter(name) {
-<<<<<<< Updated upstream
                     if (/[`!@#$%^&*()+\=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Group name can not contain special character")
-=======
-                    if (/[ `!@#$%^&*()+\=\[\]{};':"\\|,.<>\/?~]/.test(name)) throw new Error("Group name can not contain special character")
->>>>>>> Stashed changes
                 }
             }
         },
