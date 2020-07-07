@@ -9,10 +9,24 @@ let jwt = require('jsonwebtoken');
 let md5 = require('md5');
 let refreshTokenModel = require('./refresh-token');
 let redisClient = require('../utils/redis').redisClient;
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
+let request = require("request");
+let passport = require('passport');
+let LocalStrategy = require('passport-local').Strategy;
+let BearerStrategy = require("passport-azure-ad").BearerStrategy;
 
-// let captchaList = require('../captcha/captcha').captchaList;
+const bearerStrategy = new BearerStrategy({
+    identityMetadata: "https://login.microsoftonline.com/9f1fabf9-b3a8-4540-8fbb-9822f5375545/.well-known/openid-configuration",
+    clientID: process.env.AZURE_APP_ID,
+    passReqToCallback: false,
+    loggingLevel: "info"
+}, (token, done) => {
+    done(null, {}, token)
+});
+
+router.use(passport.initialize());
+
+passport.use(bearerStrategy);
+
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 router.use(bodyParser.json());
 
@@ -32,7 +46,7 @@ router.post('/refresh-token', function (req, res) {
                             } else {
                                 delete decoded.iat;
                                 delete decoded.exp;
-                                let accessToken = jwt.sign(decoded, secretKey, {expiresIn: '240h'});
+                                let accessToken = jwt.sign(decoded, secretKey, { expiresIn: '240h' });
                                 let response = {};
                                 response.token = accessToken;
                                 response.refresh_token = newRefreshToken;
@@ -62,7 +76,7 @@ passport.use(new LocalStrategy({
         .catch(err => {
             return done(err, false);
         });
-    }
+}
 ));
 router.post('/login',
     passport.authenticate('local', {
@@ -103,120 +117,115 @@ router.post('/login',
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
         }
     });
-router.post('/login1', function (req, res) {
-    req.body.username = req.body.username.toLowerCase();
-    req.body.password = md5(req.body.password);
-    if (/^su_/.test(req.body.username)) {
-        req.body.username = req.body.username.substring(3);
-        User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
-            .then(function (user) {
-                if (!user) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
-                } else {
-                    if (user.status === "Inactive") {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
-                    } else if (user.status === "Active") {
-                        let data = {
-                            username: user.username,
-                            whoami: req.body.whoami,
-                            role: user.role,
-                            company: user.company.name
-                        };
-                        let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
-                        let response = {};
-                        response.token = token;
-                        refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
-                            response.refresh_token = refreshToken;
-                            response.company = user.company;
-                            response.user = {
-                                username: user.username,
-                                role: user.role,
-                                idCompany: user.idCompany
-                            };
-                            redisClient.del(user.username + ":license");
-                            return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                        });
-                    } else {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
-                    }
-                }
-            });
-    } else {
-        User.findOne({where: {username: req.body.username}, include: {model: models.Company}})
-            .then(function (user) {
-                if (!user) {
-                    return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User is not exists."));
-                }
-                if (req.body.whoami === "data-administrator-service" && ('' + parseInt(user.role) !== "3"))
-                    return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
-                if (user.password !== req.body.password) {
-                    res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Password is not correct."));
-                } else {
-                    if (user.status === "Inactive") {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
-                    } else if (user.status === "Active") {
-                        let data = {
-                            username: user.username,
-                            whoami: req.body.whoami,
-                            role: user.role,
-                            company: user.company.name
-                        };
-                        let token = jwt.sign(data, secretKey, {expiresIn: '48h'});
-                        let response = {};
-                        response.token = token;
-                        if (req.body.whoami === 'main-service') {
-                            refreshTokenModel.clearTokenByUser(user.idUser, function () {
-                                refreshTokenModel.createRefreshToken(user.idUser, function (refreshToken) {
-                                    response.refresh_token = refreshToken;
-                                    response.company = user.company;
-                                    redisClient.del(user.username + ":license");
-                                    return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                                });
-                            });
-                        } else {
-                            response.user = {
-                                username: user.username,
-                                role: user.role,
-                                idCompany: user.idCompany
-                            };
-                            redisClient.del(user.username + ":license");
-                            return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
-                        }
-                    } else {
-                        res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation."));
-                    }
-                }
-            });
-    }
-});
 
 router.post('/register', function (req, res) {
     req.body.password = md5(req.body.password);
     req.body.username = req.body.username.toLowerCase();
-    // captchaList.put(123456, 123456);
-    if (true) {
-        // if (captchaList.get(req.body.captcha)) {
-        User.create({
-            username: req.body.username,
-            password: req.body.password,
-            fullname: req.body.fullname,
-            status: "Inactive",
-            email: req.body.email,
-            idCompany: req.body.idCompany
-        }).then(function (result) {
-            //Create token then send
-            let token = jwt.sign(req.body, secretKey, {expiresIn: '1h'});
-            res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
-        }).catch(function (err) {
-            if (err.name === "SequelizeUniqueConstraintError") {
-                res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User already exists!"));
-            } else {
-                res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
-            }
-        });
-    } else {
-        // res.send(ResponseJSON(ErrorCodes.ERROR_WRONG_PASSWORD, "Captcha was not correct!"));
-    }
+    User.create({
+        username: req.body.username,
+        password: req.body.password,
+        fullname: req.body.fullname,
+        status: "Inactive",
+        email: req.body.email,
+        idCompany: req.body.idCompany
+    }).then(function (result) {
+        //Create token then send
+        let token = jwt.sign(req.body, secretKey, { expiresIn: '1h' });
+        res.send(ResponseJSON(ErrorCodes.SUCCESS, "Success", token));
+    }).catch(function (err) {
+        if (err.name === "SequelizeUniqueConstraintError") {
+            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User already exists!"));
+        } else {
+            res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err.message));
+        }
+    });
+
 });
+
+router.get('/azure/cb', (req, res, next) => {
+    let code = req.query.code;
+    console.log("Authorize code is : ", code);
+    getAccessToken(code, function (err, response, body) {
+        if (err) return res.send(err);
+        body = JSON.parse(body);
+        console.log(body);
+        req.headers["authorization"] = "Bearer " + body.id_token;
+        next()
+    });
+}, passport.authenticate('oauth-bearer', { session: false }), (req, res) => {
+    var claims = req.authInfo;
+    console.log("User info: ", req.user);
+    console.log("Validated claims: ", claims);
+    let username = claims["upn"] || claims["unique_name"];
+    User.findOrCreate({
+        where: {
+            username: username
+        },
+        defaults: {
+            username: username,
+            password: "1",
+            status: "Active",
+            idCompany: 1,
+            role: 2,
+            account_type: "azure"
+        }
+    }).then(rs => {
+        console.log("====", rs[1], rs[0].toJSON()); //true = created
+        let user = rs[0].toJSON();
+        const data = {
+            username: user.username,
+            role: user.role,
+            company: user.idCompany
+        };
+        let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
+        res.redirect(process.env.AUTH_CLIENT_URL + "/?token=" + token);
+    })
+});
+
+
+
+function getAccessToken(code, cb) {
+    let options = {
+        method: 'POST',
+        url: process.env.AZURE_TOKEN_ENDPOINT,
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        form: {
+            grant_type: 'authorization_code',
+            client_id: process.env.AZURE_APP_ID,
+            scope: 'openid profile email',
+            redirect_uri: process.env.AZURE_REDIRECT_URI,
+            client_secret: process.env.AZURE_APP_SECERET,
+            code: code
+        },
+    };
+    request(options, function (error, response, body) {
+        cb(error, response, body)
+    });
+}
+
+router.get('/auth/azure', (req, res) => {
+    let azureUrlAuthorize =
+        process.env.AZURE_AUTHORIZE_ENDPOINT +
+        "/?" +
+        new URLSearchParams({
+            redirect_uri: process.env.AZURE_REDIRECT_URI,
+            response_type: "code",
+            scope: "openid profile email",
+            client_id: process.env.AZURE_APP_ID,
+            prompt: "select_account",
+            state: "12345"
+        }).toString();
+    res.redirect(azureUrlAuthorize);
+})
+
+// router.get('/test', (req, res, next ) => {
+//     console.log("=========",req.headers);
+//     next();
+// },passport.authenticate('oauth-bearer', { session: false }), (req, res) => {
+//     var claims = req.authInfo;
+//     console.log("User info: ", req.user);
+//     console.log("Validated claims: ", claims);
+//     res.status(200).json({ name: claims["name"] });
+// });
 
 module.exports = router;

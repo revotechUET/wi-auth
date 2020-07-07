@@ -6,6 +6,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const serverId = getRandomHash();
 const passport = require('passport');
+require('dotenv').config();
 
 function getRandomHash() {
     const current_date = (new Date()).valueOf().toString();
@@ -27,6 +28,7 @@ let licenseRouter = require('./server/license/license.router');
 let keysRouter = require('./server/keys/keys.router');
 let http = require('http').Server(app);
 
+app.use(express.static('public'));
 app.get('/', async function (req, res) {
     res.json({serverId: serverId, version: 4.0});
     // const routes = require('express-list-endpoints')(app);

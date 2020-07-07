@@ -34,15 +34,6 @@ let renewRefreshToken = function (token, callback) {
 			rs.save().then(() => {
 				callback(token);
 			});
-			// let newToken = rs.toJSON();
-			// newToken.refreshToken = randToken.uid(64);
-			// newToken.expiredAt = Date.now() + TIME_OUT;
-			// Object.assign(rs, newToken).save().then(tk => {
-			//     callback(tk.refreshToken);
-			// }).catch(err => {
-			//     console.log(err);
-			//     callback(null);
-			// });
 		} else {
 			callback(null);
 		}
