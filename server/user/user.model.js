@@ -12,6 +12,7 @@ let async = require('async');
 let request = require('request');
 let config = require('config');
 let jwt = require('jsonwebtoken');
+const { response } = require("express");
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 
 async function createUser(userInfo, done) {
@@ -32,8 +33,8 @@ async function createUser(userInfo, done) {
                     attributes: ['idCompany', 'name']
                 });
                 userInfo.idCompany = company.idCompany;
-                
-                let idx = company.license_packages.findIndex((e)=>e.idLicensePackage == userInfo.idLicensePackage);
+
+                let idx = company.license_packages.findIndex((e) => e.idLicensePackage == userInfo.idLicensePackage);
                 if (idx < 0) {
                     done(ResponseJSON(512, "No license package left", {}));
                     return;
@@ -41,7 +42,7 @@ async function createUser(userInfo, done) {
                 let value = company.license_packages[idx].company_license.value;
 
                 let count = 0;
-                let users = (await User.findAll({where: {idCompany: company.idCompany}})).map(e=>e.idLicensePackage);
+                let users = (await User.findAll({ where: { idCompany: company.idCompany } })).map(e => e.idLicensePackage);
                 for (let i = 0; i < users.length; i++) {
                     if (users[i] == userInfo.idLicensePackage) count++;
                 }
@@ -95,16 +96,24 @@ function doUserCreate(userInfo, done) {
     });
 }
 
-function infoUser(userInfo, done) {
-    User.findByPk(userInfo.idUser).then(user => {
-        if (user) {
-            done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
-        } else {
-            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error no user found"));
-        }
-    }).catch(err => {
-        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
-    })
+function infoUser(userInfo, done, req) {
+    if (userInfo.idUser) {
+        User.findByPk(userInfo.idUser).then(user => {
+            if (user) {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Successful", user));
+            } else {
+                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error no user found"));
+            }
+        }).catch(err => {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
+        })
+    } else {
+        User.findOne({ where: { username: req.decoded.username }, include: { model: Company } }).then(u => {
+            done(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
+        }).catch(err => {
+            done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
+        })
+    }
 }
 
 // function editUser(userInfo, done) {
@@ -156,8 +165,8 @@ async function editUser(userInfo, done) {
                     attributes: ['idCompany', 'name']
                 });
                 userInfo.idCompany = company.idCompany;
-                
-                let idx = company.license_packages.findIndex((e)=>e.idLicensePackage == userInfo.idLicensePackage);
+
+                let idx = company.license_packages.findIndex((e) => e.idLicensePackage == userInfo.idLicensePackage);
                 if (idx < 0) {
                     done(ResponseJSON(512, "No license package left", {}));
                     return;
@@ -165,7 +174,7 @@ async function editUser(userInfo, done) {
                 let value = company.license_packages[idx].company_license.value;
 
                 let count = 0;
-                let users = (await User.findAll({where: {idCompany: company.idCompany}})).map(e=>e.idLicensePackage);
+                let users = (await User.findAll({ where: { idCompany: company.idCompany } })).map(e => e.idLicensePackage);
                 for (let i = 0; i < users.length; i++) {
                     if (users[i] == userInfo.idLicensePackage) count++;
                 }

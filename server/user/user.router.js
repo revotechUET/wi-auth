@@ -26,7 +26,7 @@ router.post('/user/new', function (req, res) {
 router.post('/user/info', function (req, res) {
 	model.infoUser(req.body, function (status) {
 		res.send(status);
-	});
+	}, req);
 });
 
 router.post('/user/edit', function (req, res) {
