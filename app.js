@@ -6,6 +6,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const serverId = getRandomHash();
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 function getRandomHash() {
@@ -26,6 +27,7 @@ let companyRouter = require('./server/company/company.router');
 let userLanguageRouter = require('./server/language');
 let licenseRouter = require('./server/license/license.router');
 let keysRouter = require('./server/keys/keys.router');
+let logoutRouter = require('./server/authenticate/logout');
 let http = require('http').Server(app);
 
 app.use(express.static('public'));
@@ -36,10 +38,10 @@ app.get('/', async function (req, res) {
 });
 
 //use authenticate
+app.use(cookieParser());
 app.use(cors());
 app.use(passport.initialize());
 app.use('/', authenRouter);
-app.use('/', captchaRouter);
 app.use('/', userLanguageRouter);
 app.use(authenticate());
 app.get('/sync', async function (req, res) {
@@ -53,6 +55,7 @@ app.use('/', sharedProjectRouter);
 app.use('/', companyRouter);
 app.use('/', licenseRouter);
 app.use('/', keysRouter);
+app.use('/', logoutRouter);
 http.listen(process.env.AUTH_PORT || config.port, function () {
     console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
 });
