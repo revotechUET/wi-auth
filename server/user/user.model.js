@@ -108,7 +108,6 @@ function infoUser(userInfo, done, req) {
             done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Err", err.message));
         })
     } else {
-        console.log(req.decoded.username);
         User.findOne({ where: { username: req.decoded.username }, include: { model: Company } }).then(u => {
             if(!u){
                 done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User not found"));

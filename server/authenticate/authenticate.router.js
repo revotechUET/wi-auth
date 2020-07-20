@@ -9,25 +9,12 @@ let jwt = require('jsonwebtoken');
 let md5 = require('md5');
 let refreshTokenModel = require('./refresh-token');
 let redisClient = require('../utils/redis').redisClient;
-let request = require("request");
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
-let BearerStrategy = require("passport-azure-ad").BearerStrategy;
 let OIDCStrategy = require('passport-azure-ad').OIDCStrategy;
-
-
-const bearerStrategy = new BearerStrategy({
-    identityMetadata: process.env.AZURE_OPENID_CONNECT,
-    clientID: process.env.AZURE_APP_ID,
-    passReqToCallback: false,
-    loggingLevel: "info"
-}, (token, done) => {
-    done(null, {}, token)
-});
+let companyModel = require('../company/company.model');
 
 router.use(passport.initialize());
-
-passport.use(bearerStrategy);
 
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 router.use(bodyParser.json());
@@ -80,12 +67,12 @@ passport.use(new LocalStrategy({
 ));
 
 router.post('/login',
-passport.authenticate('local', {
+    passport.authenticate('local', {
         session: false,
     }),
     function (req, res) {
         if (!req.user.status) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, req.user.message, req.user.message));
-        const user = req.user;
+        const user = req.user.user;
         if (user.status !== 'Active') {
             return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation.", "You are not activated. Please wait for account activation."));
         }
@@ -138,43 +125,9 @@ passport.authenticate('local', {
 // });
 
 
-function getAccessToken(code, cb) {
-    let options = {
-        method: 'POST',
-        url: process.env.AZURE_TOKEN_ENDPOINT,
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        form: {
-            grant_type: 'authorization_code',
-            client_id: process.env.AZURE_APP_ID,
-            scope: 'openid profile email',
-            redirect_uri: process.env.AUTH_CLIENT_URL,
-            client_secret: process.env.AZURE_APP_SECERET,
-            code: code
-        },
-    };
-    request(options, function (error, response, body) {
-        cb(error, response, body)
-    });
-}
-
-router.get('/auth/azure', (req, res) => {
-    let azureUrlAuthorize =
-        process.env.AZURE_AUTHORIZE_ENDPOINT +
-        "/?" +
-        new URLSearchParams({
-            redirect_uri: process.env.AUTH_CLIENT_URL,
-            response_type: "code",
-            scope: "openid profile email",
-            client_id: process.env.AZURE_APP_ID,
-            prompt: "select_account",
-            validateIssuer: false,
-            isB2C: true
-        }).toString();
-    res.redirect(azureUrlAuthorize);
-})
 
 router.post('/is-authenticated', (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     refreshTokenModel.findRefreshToken({ client_id: req.body.client_id }).then(r => {
         if (!r) {
             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Session dose not exist", { token: null, refreshToken: null }));
@@ -189,26 +142,14 @@ router.post('/is-authenticated', (req, res) => {
     });
 })
 
-router.get("/cb", passport.authenticate('azuread-openidconnect', {
-    // tenantIdOrName: "9f1fabf9-b3a8-4540-8fbb-9822f5375545",
-    session: false
-}),
-    (req, res) => {
-        res.send("Ok")
-    })
-
-// router.get('/cb', (req, res)=>{
-//     res.send(req.query)
-// })
 passport.use(new OIDCStrategy({
     identityMetadata: process.env.AZURE_OPENID_CONNECT,
     clientID: process.env.AZURE_APP_ID,
     responseType: "code",
     responseMode: "query",
-    redirectUrl: process.env.AUTH_CLIENT_URL,
+    redirectUrl: process.env.AZURE_REDIRECT_URI,
     allowHttpForRedirectUrl: true,
     clientSecret: process.env.AZURE_APP_SECERET,
-    prompt: "select_account",
     validateIssuer: false,
     // isB2C: true,
     // issuer: false,
@@ -220,74 +161,71 @@ passport.use(new OIDCStrategy({
     nonceMaxAmount: 5,
     useCookieInsteadOfSession: true,
     // cookieSameSite: config.creds.cookieSameSite, // boolean
-    cookieEncryptionKeys: [ { key: '12345678901234567890123456789012', 'iv': '123456789012' }],
+    cookieEncryptionKeys: [{ key: '12345678901234567890123456789012', 'iv': '123456789012' }],
     // clockSkew: config.creds.clockSkew,
-  },
-  function(req, iss, sub, profile, accessToken, refreshToken, done) {
-    console.log("============================");
-    if (!profile.oid) {
-      return done(new Error("No oid found"), null);
+},
+    function (req, iss, sub, profile, accessToken, refreshToken, done) {
+        if (!profile.oid) {
+            return done(new Error("No oid found"), null);
+        }
+        return done(null, profile);
     }
-    return done(null, profile);
-    // asynchronous verification, for effect...
-    // process.nextTick(function () {
-    //   findByOid(profile.oid, function(err, user) {
-    //     if (err) {
-    //       return done(err);
-    //     }
-    //     if (!user) {
-    //       // "Auto-registration"
-    //       users.push(profile);
-    //       return done(null, profile);
-    //     }
-    //     return done(null, user);
-    //   });
-    // });
-  }
 ));
 
-router.post('/azure/get-token', (req, res, next) => {
-    let code = req.body.code;
-    console.log("Authorize code is : ", code);
-    getAccessToken(code, function (err, response, body) {
-        if (err) return res.send(err);
-        body = JSON.parse(body);
-        console.log(body);
-        req.headers["authorization"] = "Bearer " + body.id_token;
-        next()
-    });
-}, passport.authenticate('oauth-bearer', { session: false }), (req, res) => {
-    var claims = req.authInfo;
-    console.log("User info: ", req.user);
-    console.log("Validated claims: ", claims);
-    let username = claims["upn"] || claims["unique_name"] || claims["preferred_username"];
-    User.findOrCreate({
-        where: {
-            username: username
-        },
-        defaults: {
-            username: username,
-            password: "1",
-            status: "Active",
-            idCompany: 1,
-            idLicensePackage: 1,
-            role: 2,
-            account_type: "azure"
-        }
-    }).then(rs => {
+
+
+router.get('/login-azure', (req, res, next) => {
+    if (req.query.client_id) res.cookie("client_id", req.query.client_id)
+    next();
+}, passport.authenticate('azuread-openidconnect', {
+    session: false,
+    prompt: "select_account"
+}), async (req, res) => {
+    try {
+        var claims = req.user._json;
+        console.log("Validated claims: ", claims);
+        let username = claims["upn"] || claims["unique_name"] || claims["preferred_username"];
+        let userDomain = username.split('@').pop();
+        let company = userDomain ? await companyModel.findCompanyByDomain(userDomain) : null;
+        let userCreated = company ? await User.findOrCreate({
+            where: { username: username },
+            defaults: {
+                username: username,
+                password: "456983772cd3593819303986ad6ee88f",
+                status: "Inactive",
+                idCompany: company.idCompany,
+                idLicensePackage: 1,
+                role: 2,
+                account_type: "azure"
+            }
+        }) : null;
         // console.log("====", rs[1], rs[0].toJSON()); //true = created
-        let user = rs[0].toJSON();
-        const data = {
-            username: user.username,
-            role: user.role,
-            company: user.idCompany
-        };
-        let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
-        refreshTokenModel.createRefreshToken(token, req.body.client_id, user.idUser, function (session) {
-            res.send(ResponseJSON(ErrorCodes.SUCCESS, "Done", { token: session.token, refreshToken: session.refreshToken }));
-        });
-    })
+        let user = userCreated[0].toJSON();
+        if (user.status !== "Active") {
+            res.redirect("/auth-failed?message=" + "You are not activated. Please wait for account activation. Or contact us via this address support@i2g.cloud");
+        } else {
+            const data = {
+                username: user.username,
+                role: user.role,
+                company: user.idCompany
+            };
+            let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
+            refreshTokenModel.createRefreshToken(token, req.cookies.client_id1, user.idUser, (session) => {
+                if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
+                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refresh_token}&client_id=${session.client_id}`);
+            })
+        }
+    } catch (e) {
+        return res.redirect("/auth-failed?message=" + e.message);
+    }
 });
 
+router.get('/auth-failed', (req, res) => {
+    if (req.query.message) {
+        res.status(401).json(req.query.message);
+    } else {
+        res.status(401).json("Unauthorized");
+    }
+})
 
 module.exports = router;
