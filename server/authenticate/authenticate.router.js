@@ -12,6 +12,7 @@ let redisClient = require('../utils/redis').redisClient;
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
 let OIDCStrategy = require('passport-azure-ad').OIDCStrategy;
+let GoogleStrategy = require('passport-google-oauth20').Strategy;
 let companyModel = require('../company/company.model');
 
 router.use(passport.initialize());
@@ -102,7 +103,7 @@ router.post('/login',
         };
         redisClient.del(user.username + ":license");
         refreshTokenModel.createRefreshToken(response.token, req.body.client_id || uuidv4(), user.idUser, function (refreshToken) {
-            if(!refreshToken) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error", "Can't login"))
+            if (!refreshToken) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error", "Can't login"))
             response.refresh_token = refreshToken.refresh_token;
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
         })
@@ -194,6 +195,67 @@ router.get('/login-azure', (req, res, next) => {
         var claims = req.user._json;
         console.log("Validated claims: ", claims);
         let username = claims["upn"] || claims["unique_name"] || claims["preferred_username"];
+        let userDomain = username.split('@').pop();
+        let company = userDomain ? await companyModel.findCompanyByDomain(userDomain) : null;
+        let userCreated = company ? await User.findOrCreate({
+            where: { username: username },
+            defaults: {
+                username: username,
+                password: "456983772cd3593819303986ad6ee88f",
+                status: process.env.NEW_USER_STATUS || "Inactive",
+                idCompany: company.idCompany,
+                idLicensePackage: 1,
+                role: 2,
+                account_type: "azure"
+            }
+        }) : null;
+        // console.log("====", rs[1], rs[0].toJSON()); //true = created
+        let user = userCreated[0].toJSON();
+        if (user.status !== "Active") {
+            res.redirect("/auth-failed?message=" + "You are not activated. Please wait for account activation. Or contact us via this address support@i2g.cloud");
+        } else {
+            const data = {
+                username: user.username,
+                role: user.role,
+                company: user.idCompany
+            };
+            let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
+            refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
+                if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
+                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refresh_token}&client_id=${session.client_id}`);
+            })
+        }
+    } catch (e) {
+        return res.redirect("/auth-failed?message=" + e.message);
+    }
+});
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+    done(null, null);
+});
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_REDIRECT_URI
+}, (accessToken, refreshToken, profile, cb) => {
+    cb(null, profile);
+}));
+
+router.get('/login-google', (req, res, next) => {
+    if (req.query.client_id) res.cookie("client_id", req.query.client_id)
+    next();
+}, passport.authenticate('google', {
+    scope: ['profile', 'email']
+}), async (req, res) => {
+    try {
+        var claims = req.user._json;
+        console.log("Validated claims: ", claims);
+        let username = claims["email"];
         let userDomain = username.split('@').pop();
         let company = userDomain ? await companyModel.findCompanyByDomain(userDomain) : null;
         let userCreated = company ? await User.findOrCreate({
