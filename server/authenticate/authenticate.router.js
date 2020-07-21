@@ -192,7 +192,7 @@ router.get('/login-azure', (req, res, next) => {
             defaults: {
                 username: username,
                 password: "456983772cd3593819303986ad6ee88f",
-                status: "Inactive",
+                status: process.env.NEW_USER_STATUS || "Inactive",
                 idCompany: company.idCompany,
                 idLicensePackage: 1,
                 role: 2,
@@ -210,7 +210,7 @@ router.get('/login-azure', (req, res, next) => {
                 company: user.idCompany
             };
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
-            refreshTokenModel.createRefreshToken(token, req.cookies.client_id1, user.idUser, (session) => {
+            refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
                 if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
                 res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refresh_token}&client_id=${session.client_id}`);
             })
