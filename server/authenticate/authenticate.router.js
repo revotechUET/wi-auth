@@ -74,10 +74,7 @@ function uuidv4() {
     });
 }
 
-router.post('/login', (req, res, next) => {
-    if (!req.body.client_id) res.cookie("client_id", uuidv4());
-    next();
-},
+router.post('/login',
     passport.authenticate('local', {
         session: false,
     }),
@@ -104,8 +101,7 @@ router.post('/login', (req, res, next) => {
             idCompany: user.idCompany
         };
         redisClient.del(user.username + ":license");
-        console.log("====", req.cookies)
-        refreshTokenModel.createRefreshToken(response.token, req.body.client_id || req.cookies.client_id, user.idUser, function (refreshToken) {
+        refreshTokenModel.createRefreshToken(response.token, req.body.client_id || uuidv4(), user.idUser, function (refreshToken) {
             if(!refreshToken) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error", "Can't login"))
             response.refresh_token = refreshToken.refresh_token;
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
