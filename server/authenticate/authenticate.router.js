@@ -66,7 +66,18 @@ passport.use(new LocalStrategy({
 }
 ));
 
-router.post('/login',
+function uuidv4() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0,
+            v = c == "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
+router.post('/login', (req, res, next) => {
+    if (!req.body.client_id) res.cookie("client_id", uuidv4());
+    next();
+},
     passport.authenticate('local', {
         session: false,
     }),
@@ -93,7 +104,7 @@ router.post('/login',
             idCompany: user.idCompany
         };
         redisClient.del(user.username + ":license");
-        refreshTokenModel.createRefreshToken(response.token, req.body.client_id, user.idUser, function (refreshToken) {
+        refreshTokenModel.createRefreshToken(response.token, req.body.client_id || req.cookies.client_id, user.idUser, function (refreshToken) {
             response.refresh_token = refreshToken.refresh_token;
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
         })
