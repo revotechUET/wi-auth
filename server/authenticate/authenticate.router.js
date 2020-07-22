@@ -189,7 +189,7 @@ router.get('/login-azure', (req, res, next) => {
     next();
 }, passport.authenticate('azuread-openidconnect', {
     session: false,
-    prompt: "select_account"
+    prompt: "consent"
 }), async (req, res) => {
     try {
         var claims = req.user._json;
