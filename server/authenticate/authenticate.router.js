@@ -204,8 +204,10 @@ router.get('/login-azure', (req, res, next) => {
                 password: "456983772cd3593819303986ad6ee88f",
                 status: process.env.NEW_USER_STATUS || "Inactive",
                 idCompany: company.idCompany,
-                idLicensePackage: 1,
+                idLicensePackage: process.env.DEFAULT_LICENSE_PACKAGE || 1,
                 role: 2,
+                email: username,
+                account_id: claims.oid,
                 account_type: "azure"
             }
         }) : null;
@@ -265,9 +267,11 @@ router.get('/login-google', (req, res, next) => {
                 password: "456983772cd3593819303986ad6ee88f",
                 status: process.env.NEW_USER_STATUS || "Inactive",
                 idCompany: company.idCompany,
-                idLicensePackage: 1,
+                idLicensePackage: process.env.DEFAULT_LICENSE_PACKAGE || 1,
                 role: 2,
-                account_type: "azure"
+                email: username,
+                account_type: "google",
+                account_id: claims.sub
             }
         }) : null;
         // console.log("====", rs[1], rs[0].toJSON()); //true = created
