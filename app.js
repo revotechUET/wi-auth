@@ -43,6 +43,7 @@ app.use(cors());
 app.use(passport.initialize());
 app.use('/', authenRouter);
 app.use('/', userLanguageRouter);
+app.post('/utm-zones', proxy());
 app.use(authenticate());
 app.get('/sync', async function (req, res) {
     await require('./server/license/sync-feature-api')();
