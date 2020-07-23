@@ -109,7 +109,11 @@ function infoUser(userInfo, done, req) {
         })
     } else {
         User.findOne({ where: { username: req.decoded.username }, include: { model: Company } }).then(u => {
-            done(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
+            if(!u){
+                done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User not found"));
+            } else {
+                done(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
+            }
         }).catch(err => {
             done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, err.message, err));
         })

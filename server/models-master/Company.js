@@ -38,6 +38,11 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING(20),
             allowNull: false,
             unique: true
+        },
+        domains: {
+            type: DataTypes.STRING(500),
+            allowNull: true,
+            defaultValue: "[]"
         }
     });
 };

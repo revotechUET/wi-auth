@@ -3,6 +3,7 @@ let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
 let async = require('async');
 let crypto = require('crypto');
+const { resolve } = require('path');
 
 function getRandomHash() {
     const current_date = (new Date()).valueOf().toString();
@@ -63,7 +64,7 @@ function listCompany(payload, callback) {
     models.Company.findAll().then(comps => {
         async.each(comps, function (comp, next) {
             comp = comp.toJSON();
-            models.User.findAndCountAll({where: {idCompany: comp.idCompany, status: "Active"}}).then(users => {
+            models.User.findAndCountAll({ where: { idCompany: comp.idCompany, status: "Active" } }).then(users => {
                 comp.users = users.count;
                 resp.push(comp);
                 next();
@@ -74,10 +75,29 @@ function listCompany(payload, callback) {
     });
 }
 
+
+function findCompanyByDomain(_domain) {
+    return new Promise(resolve => {
+        models.Company.findAll().then(comps => {
+            let compWithDomain = comps.find(comp => JSON.parse(comp.domains).includes(_domain));
+            let compDefault = comps.find(comp => comp.name === "Default");
+            if (compWithDomain) {
+                return resolve(compWithDomain.toJSON());
+            } else if (compDefault) {
+                return resolve(compDefault.toJSON());
+            } else {
+                console.log("No company default found");
+                resolve(null);
+            }
+        });
+    });
+};
+
 module.exports = {
     createCompany: createCompany,
     editCompany: editCompany,
     deleteCompany: deleteCompany,
     infoCompany: infoCompany,
-    listCompany: listCompany
+    listCompany: listCompany,
+    findCompanyByDomain
 };

@@ -5,7 +5,7 @@ let User = require('../models-master/User');
 const skipList = [
     '/company/list',
     '^/pattern.*',
-    '/csv/.*'
+    '/csv/.*',
 ];
 
 module.exports = function () {
