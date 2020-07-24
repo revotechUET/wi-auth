@@ -224,7 +224,7 @@ router.get('/login-azure', (req, res, next) => {
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
             refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
                 if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
-                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refresh_token}&client_id=${session.client_id}`);
+                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refreshToken}&client_id=${session.client_id}`);
             })
         }
     } catch (e) {
@@ -287,7 +287,7 @@ router.get('/login-google', (req, res, next) => {
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
             refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
                 if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
-                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refresh_token}&client_id=${session.client_id}`);
+                res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refreshToken}&client_id=${session.client_id}`);
             })
         }
     } catch (e) {
