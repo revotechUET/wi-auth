@@ -104,7 +104,7 @@ router.post('/login',
         redisClient.del(user.username + ":license");
         refreshTokenModel.createRefreshToken(response.token, req.body.client_id || uuidv4(), user.idUser, function (refreshToken) {
             if (!refreshToken) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error", "Can't login"))
-            response.refresh_token = refreshToken.refresh_token;
+            response.refresh_token = refreshToken.refreshToken;
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
         })
         // }
