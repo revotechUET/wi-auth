@@ -138,12 +138,22 @@ router.post('/login',
 
 router.post('/is-authenticated', (req, res) => {
     // console.log(req.body)
-    refreshTokenModel.findRefreshToken({ client_id: req.body.client_id }).then(r => {
+    let client_id = req.body.client_id;
+    let wi_client = req.body.whoami || "backend_unknow_whoami";
+    refreshTokenModel.findRefreshToken({ client_id: client_id }).then(r => {
         if (!r) {
             res.send(ResponseJSON(ErrorCodes.SUCCESS, "Session dose not exist", { token: null, refreshToken: null }));
         } else {
-            console.log("Session existed..")
-            res.send(ResponseJSON(ErrorCodes.SUCCESS, "Session existed ", { token: r.token, refreshToken: r.refreshToken }));
+            let decoded = jwt.decode(r.token);
+            console.log("Session existed..");
+            decoded.whoami = wi_client;
+            delete decoded.iat;
+            delete decoded.exp;
+            let new_token = jwt.sign(decoded, secretKey, { expiresIn: '48h' });
+            refreshTokenModel.createRefreshToken(wi_client, new_token, client_id, r.idUser, (session) => {
+                if (!session) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error while create new refresh token", "Error while create new refresh token"));
+                res.send(ResponseJSON(ErrorCodes.SUCCESS, "Session existed ", { token: session.token, refreshToken: session.refreshToken }));
+            });
         }
 
     }).catch(e => {
