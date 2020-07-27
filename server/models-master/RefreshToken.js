@@ -29,6 +29,10 @@ module.exports = function (sequelize, DataTypes) {
         token: {
             type: DataTypes.STRING(500),
             allowNull: false
+        },
+        wi_client: {
+            type: DataTypes.STRING(128),
+            allowNull: true
         }
     });
 };

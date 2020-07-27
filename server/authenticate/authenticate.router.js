@@ -102,7 +102,7 @@ router.post('/login',
             idCompany: user.idCompany
         };
         redisClient.del(user.username + ":license");
-        refreshTokenModel.createRefreshToken(response.token, req.body.client_id || uuidv4(), user.idUser, function (refreshToken) {
+        refreshTokenModel.createRefreshToken(req.body.whoami, response.token, req.body.client_id || uuidv4(), user.idUser, function (refreshToken) {
             if (!refreshToken) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error", "Can't login"))
             response.refresh_token = refreshToken.refreshToken;
             return res.send(ResponseJSON(ErrorCodes.SUCCESS, "Successful", response));
@@ -152,7 +152,7 @@ router.post('/is-authenticated', (req, res) => {
     });
 })
 
-passport.use(new OIDCStrategy({
+if (process.env.AZURE_APP_ID) passport.use(new OIDCStrategy({
     identityMetadata: process.env.AZURE_OPENID_CONNECT,
     clientID: process.env.AZURE_APP_ID,
     responseType: "code",
@@ -186,6 +186,7 @@ passport.use(new OIDCStrategy({
 
 router.get('/login-azure', (req, res, next) => {
     if (req.query.client_id) res.cookie("client_id", req.query.client_id)
+    if (req.query.whoami) res.cookie("whoami", req.query.whoami);
     next();
 }, passport.authenticate('azuread-openidconnect', {
     session: false,
@@ -219,10 +220,11 @@ router.get('/login-azure', (req, res, next) => {
             const data = {
                 username: user.username,
                 role: user.role,
-                company: user.idCompany
+                company: user.idCompany,
+                whoami: req.cookies.whoami
             };
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
-            refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
+            refreshTokenModel.createRefreshToken(req.cookies.whoami, token, req.cookies.client_id, user.idUser, (session) => {
                 if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
                 res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refreshToken}&client_id=${session.client_id}`);
             })
@@ -240,7 +242,7 @@ passport.deserializeUser((id, done) => {
     done(null, null);
 });
 
-passport.use(new GoogleStrategy({
+if (process.env.GOOGLE_CLIENT_ID) passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_REDIRECT_URI
@@ -249,7 +251,8 @@ passport.use(new GoogleStrategy({
 }));
 
 router.get('/login-google', (req, res, next) => {
-    if (req.query.client_id) res.cookie("client_id", req.query.client_id)
+    if (req.query.client_id) res.cookie("client_id", req.query.client_id);
+    if (req.query.whoami) res.cookie("whoami", req.query.whoami);
     next();
 }, passport.authenticate('google', {
     scope: ['profile', 'email']
@@ -282,10 +285,11 @@ router.get('/login-google', (req, res, next) => {
             const data = {
                 username: user.username,
                 role: user.role,
-                company: user.idCompany
+                company: user.idCompany,
+                whoami: req.cookies.whoami
             };
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
-            refreshTokenModel.createRefreshToken(token, req.cookies.client_id, user.idUser, (session) => {
+            refreshTokenModel.createRefreshToken(req.cookies.whoami, token, req.cookies.client_id, user.idUser, (session) => {
                 if (!session) return res.redirect('/auth-failed?message=' + "Can not create session");
                 res.redirect(`${process.env.AUTH_CLIENT_REDIRECT}?token=${session.token}&refreshToken=${session.refreshToken}&client_id=${session.client_id}`);
             })

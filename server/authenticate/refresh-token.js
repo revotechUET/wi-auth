@@ -6,16 +6,18 @@ const { JsonWebTokenError, decode, sign } = require("jsonwebtoken");
 const TIME_OUT = 1000 * 60 * 60 * 24 * 2;
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 
-let createRefreshToken = function (token, client_id, idUser, callback) {
+let createRefreshToken = function (wi_client, token, client_id, idUser, callback) {
 	let refreshToken = new Object();
 	refreshToken.refreshToken = randToken.uid(64);
 	refreshToken.idUser = idUser;
 	refreshToken.expiredAt = Date.now() + TIME_OUT;
 	refreshToken.client_id = client_id;
 	refreshToken.token = token;
+	refreshToken.wi_client = wi_client;
 	RefreshToken.findOrCreate({
 		where: {
-			client_id: client_id
+			client_id: client_id,
+			wi_client: wi_client
 		},
 		defaults: refreshToken
 	}).then(rs => {
