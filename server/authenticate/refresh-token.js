@@ -14,6 +14,7 @@ let createRefreshToken = function (wi_client, token, client_id, idUser, callback
 	refreshToken.client_id = client_id;
 	refreshToken.token = token;
 	refreshToken.wi_client = wi_client;
+	refreshToken.userAgent = decode(token).username;
 	RefreshToken.findOrCreate({
 		where: {
 			client_id: client_id,
