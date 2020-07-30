@@ -85,7 +85,7 @@ router.post('/login',
         if (user.status !== 'Active') {
             return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not activated. Please wait for account activation.", "You are not activated. Please wait for account activation."));
         }
-        if (req.body.whoami === "data-administrator-service" && ('' + parseInt(user.role) !== "3")) {
+        if (req.body.whoami === "data-administrator-service" || req.body.whoami === "i2g-data-administrator" && ('' + parseInt(user.role) !== "3")) {
             return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
         }
         const data = {
@@ -226,6 +226,10 @@ router.get('/login-azure', (req, res, next) => {
         let user = userCreated[0].toJSON();
         if (user.status !== "Active") {
             res.redirect("/auth-failed?message=" + "You are not activated. Please wait for account activation. Or contact us via this address support@i2g.cloud");
+
+        } else if (req.cookies.whoami === "data-administrator-service" || req.cookies.whoami === "i2g-data-administrator" && ('' + parseInt(user.role) !== "3")) {
+            // return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
+            res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
             const data = {
                 username: user.username,
@@ -291,6 +295,9 @@ router.get('/login-google', (req, res, next) => {
         let user = userCreated[0].toJSON();
         if (user.status !== "Active") {
             res.redirect("/auth-failed?message=" + "You are not activated. Please wait for account activation. Or contact us via this address support@i2g.cloud");
+        } else if (req.cookies.whoami === "data-administrator-service" || req.cookies.whoami === "i2g-data-administrator" && ('' + parseInt(user.role) !== "3")) {
+            // return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
+            res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
             const data = {
                 username: user.username,
