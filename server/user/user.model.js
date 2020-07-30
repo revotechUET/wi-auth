@@ -339,7 +339,7 @@ function listUser(userInfo, done, decoded) {
         } else if (decoded.role === 2) {
             User.findAll({
                 where: { username: decoded.username },
-                include: [{ model: LicensePackage }, { model: Company }, { mode: Group }]
+                include: [{ model: LicensePackage }, { model: Company }, { model: Group }]
             }).then(u => {
                 done(ResponseJSON(200, "Done", u));
             });
