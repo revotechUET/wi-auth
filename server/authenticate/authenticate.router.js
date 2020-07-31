@@ -151,7 +151,7 @@ router.post('/is-authenticated', (req, res) => {
             delete decoded.exp;
             let new_token = jwt.sign(decoded, secretKey, { expiresIn: '48h' });
             if (wi_client === "data-administrator-service" || wi_client === "i2g-data-administrator" && ('' + parseInt(decoded.role) !== "3")) {
-                res.redirect("/auth-failed?message=" + "You are not activated. Please wait for account activation. Or contact us via this address support@i2g.cloud");
+                return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login.", "You are not alowed to login."));
             } else {
                 refreshTokenModel.createRefreshToken(wi_client, new_token, client_id, r.idUser, (session) => {
                     if (!session) return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Error while create new refresh token", "Error while create new refresh token"));
