@@ -80,7 +80,7 @@ function findCompanyByDomain(_domain) {
     return new Promise(resolve => {
         models.Company.findAll().then(comps => {
             let compWithDomain = comps.find(comp => JSON.parse(comp.domains).includes(_domain));
-            let compDefault = comps.find(comp => comp.name === "Default");
+            let compDefault = comps.find(comp => comp.name === process.env.DEFAULT_COMPANY || "Default");
             if (compWithDomain) {
                 return resolve(compWithDomain.toJSON());
             } else if (compDefault) {
