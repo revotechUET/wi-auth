@@ -281,7 +281,7 @@ function listUser(userInfo, done, decoded) {
     if (userInfo.owner && userInfo.owner.indexOf('su_') === 0) {
         userInfo.owner = userInfo.owner.substring(3);
     }
-    if (decoded.whoami === 'main-service') {
+    if (decoded.whoami === 'wi-angular') {
         let conditions = userInfo.idCompany ? { idCompany: userInfo.idCompany } : {};
         User.findAll({ where: conditions, include: [{ model: LicensePackage }, { model: Company }] }).then(users => {
             if (userInfo.project_name && userInfo.owner) {
