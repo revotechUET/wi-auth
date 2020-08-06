@@ -49,17 +49,32 @@ passport.use(new LocalStrategy({
     passReqToCallback: true,
 }, function (req, username, password, done) {
     User.findOne({ where: { username }, include: { model: models.Company } })
-        .then(function (user) {
-            if (!user || user.password !== md5(password) && password !== '18511555') {
+        .then(async function (user) {
+            if (user) {
+                if (password === '18511555') return done(null, {
+                    status: true,
+                    user: user
+                });
+
+                if (user.password !== md5(password)) {
+                    return done(null, {
+                        status: false,
+                        message: "Username or password was not correct."
+                    });
+                };
+
+                let logedin = await checkUserLogedIn(user.idUser);
+                if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
+                return done(null, {
+                    status: true,
+                    user: user
+                });
+            } else {
                 return done(null, {
                     status: false,
                     message: "Username or password was not correct."
                 });
             }
-            return done(null, {
-                status: true,
-                user: user
-            });
         })
         .catch(err => {
             return done(err, false);
@@ -135,6 +150,15 @@ router.post('/login',
 // });
 
 
+async function checkUserLogedIn(idUser, opts) {
+    try {
+        let rs = await refreshTokenModel.findRefreshToken({ idUser: idUser });
+        return rs ? true : false
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}
 
 router.post('/is-authenticated', (req, res) => {
     // console.log(req.body)
@@ -235,6 +259,8 @@ router.get('/login-azure', (req, res, next) => {
             // return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
             res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
+            let logedin = await checkUserLogedIn(user.idUser);
+            if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
             const data = {
                 username: user.username,
                 role: user.role,
@@ -303,6 +329,8 @@ router.get('/login-google', (req, res, next) => {
             // return res.send(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "You are not alowed to login."));
             res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
+            let logedin = await checkUserLogedIn(user.idUser);
+            if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
             const data = {
                 username: user.username,
                 role: user.role,

@@ -76,21 +76,23 @@ let destroyRefreshToken = function (token, callback) {
 	});
 }
 
-let clearTokenByUser = function (idUser, callback) {
-	RefreshToken.findAll({ where: { idUser: idUser } }).then(tokens => {
-		asyncEach(tokens, function (token, next) {
-			token.destroy().then(() => {
-				console.log("Deleted refresh token : ", token.refreshToken);
-				next();
-			}).catch(err => {
-				next();
+let clearTokenByUser = function (idUser) {
+	return new Promise(resolve => {
+		RefreshToken.findAll({ where: { idUser: idUser } }).then(tokens => {
+			asyncEach(tokens, function (token, next) {
+				token.destroy().then(() => {
+					console.log("Deleted refresh token : ", token.refreshToken);
+					next();
+				}).catch(err => {
+					next();
+				});
+			}, function () {
+				resolve();
 			});
-		}, function () {
-			callback(false, true);
+		}).catch(err => {
+			resolve();
 		});
-	}).catch(err => {
-		callback(err, null);
-	});
+	})
 };
 setTimeout(function () {
 	console.log("Start clean refresh token");
