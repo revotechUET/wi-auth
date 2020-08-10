@@ -64,7 +64,7 @@ passport.use(new LocalStrategy({
                 };
 
                 let logedin = await checkUserLogedIn(user.idUser);
-                if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
+                if (logedin && process.env.MULTI_LOGIN === "NotAllowed") await refreshTokenModel.clearTokenByUser(user.idUser);
                 return done(null, {
                     status: true,
                     user: user
@@ -260,7 +260,7 @@ router.get('/login-azure', (req, res, next) => {
             res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
             let logedin = await checkUserLogedIn(user.idUser);
-            if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
+            if (logedin && process.env.MULTI_LOGIN === "NotAllowed") await refreshTokenModel.clearTokenByUser(user.idUser);
             const data = {
                 username: user.username,
                 role: user.role,
@@ -330,7 +330,7 @@ router.get('/login-google', (req, res, next) => {
             res.redirect("/auth-failed?message=" + "You are not alowed to login.");
         } else {
             let logedin = await checkUserLogedIn(user.idUser);
-            if (logedin) await refreshTokenModel.clearTokenByUser(user.idUser);
+            if (logedin && process.env.MULTI_LOGIN === "NotAllowed") await refreshTokenModel.clearTokenByUser(user.idUser);
             const data = {
                 username: user.username,
                 role: user.role,
