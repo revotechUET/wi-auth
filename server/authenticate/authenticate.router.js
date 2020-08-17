@@ -107,7 +107,8 @@ router.post('/login',
             username: user.username,
             whoami: req.body.whoami,
             role: user.role,
-            company: user.company.name
+            company: user.company.name,
+            q: Buffer.from(JSON.stringify(user.quota)).toString('base64')
         };
         const response = {};
         response.token = jwt.sign(data, secretKey, { expiresIn: '48h' });
@@ -265,7 +266,8 @@ router.get('/login-azure', (req, res, next) => {
                 username: user.username,
                 role: user.role,
                 company: user.idCompany,
-                whoami: req.cookies.whoami
+                whoami: req.cookies.whoami,
+                q: Buffer.from(JSON.stringify(user.quota)).toString('base64')
             };
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
             refreshTokenModel.createRefreshToken(req.cookies.whoami, token, req.cookies.client_id, user.idUser, (session) => {
@@ -335,7 +337,8 @@ router.get('/login-google', (req, res, next) => {
                 username: user.username,
                 role: user.role,
                 company: user.idCompany,
-                whoami: req.cookies.whoami
+                whoami: req.cookies.whoami,
+                q: Buffer.from(JSON.stringify(user.quota)).toString('base64')
             };
             let token = jwt.sign(data, secretKey, { expiresIn: '48h' });
             refreshTokenModel.createRefreshToken(req.cookies.whoami, token, req.cookies.client_id, user.idUser, (session) => {
