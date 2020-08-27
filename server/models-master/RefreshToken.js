@@ -13,6 +13,26 @@ module.exports = function (sequelize, DataTypes) {
         expiredAt: {
             type: DataTypes.DATE,
             allowNull: false
+        },
+        ipaddress: {
+            type: DataTypes.STRING(50),
+            allowNull: true
+        },
+        userAgent: {
+            type: DataTypes.STRING(500),
+            allowNull: true
+        },
+        client_id: {
+            type: DataTypes.STRING(128),
+            allowNull: false
+        },
+        token: {
+            type: DataTypes.STRING(500),
+            allowNull: false
+        },
+        wi_client: {
+            type: DataTypes.STRING(128),
+            allowNull: true
         }
     });
 };

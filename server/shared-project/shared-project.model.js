@@ -74,12 +74,12 @@ function addToGroup(data, done) {
                             }).then(user => {
                                 gr[0].addUser(user.idUser);
                                 rs.addGroup(gr[0].idGroup, {through: {permission: defaultPerm}});
-                                done(ResponseJSON(200, "Done"));
+                                done(ResponseJSON(200, "Done", rs));
                             });
                         });
                     } else {
                         rs.addGroup(data.idGroup, {through: {permission: defaultPerm}});
-                        done(ResponseJSON(200, 'Successful', data));
+                        done(ResponseJSON(200, 'Successful', rs));
                     }
                 } else {
                     done(ResponseJSON(512, "Share key isn't correct"));

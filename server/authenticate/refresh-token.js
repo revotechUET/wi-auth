@@ -2,23 +2,39 @@ let models = require("../models-master/index");
 let RefreshToken = models.RefreshToken;
 let randToken = require('rand-token');
 const asyncEach = require('async/each');
-const TIME_OUT = 1000 * 60 * 60 * 24 * 5;
+const { JsonWebTokenError, decode, sign } = require("jsonwebtoken");
+const TIME_OUT = 1000 * 60 * 60 * 24 * 2;
+let secretKey = process.env.AUTH_JWTKEY || "secretKey";
 
-let createRefreshToken = function (idUser, callback) {
+let createRefreshToken = function (wi_client, token, client_id, idUser, callback) {
 	let refreshToken = new Object();
 	refreshToken.refreshToken = randToken.uid(64);
 	refreshToken.idUser = idUser;
 	refreshToken.expiredAt = Date.now() + TIME_OUT;
-	RefreshToken.create(refreshToken).then(rs => {
-		callback(rs.refreshToken);
+	refreshToken.client_id = client_id;
+	refreshToken.token = token;
+	refreshToken.wi_client = wi_client;
+	refreshToken.userAgent = decode(token).username;
+	RefreshToken.findOrCreate({
+		where: {
+			client_id: client_id,
+			wi_client: wi_client
+		},
+		defaults: refreshToken
+	}).then(rs => {
+		callback(rs[0].toJSON());
 	}).catch(err => {
 		console.log(err);
 		callback(null);
 	});
 }
 
-let checkRefreshToken = function (token, callback) {
-	RefreshToken.findOne({where: {refreshToken: token}}).then(rs => {
+let findRefreshToken = async function (opts) {
+	return RefreshToken.findOne({ where: opts })
+};
+
+let checkRefreshToken = function (refreshToken, callback) {
+	RefreshToken.findOne({ where: { refreshToken: refreshToken } }).then(rs => {
 		if (rs) {
 			callback(rs);
 		} else {
@@ -27,22 +43,18 @@ let checkRefreshToken = function (token, callback) {
 	});
 }
 
-let renewRefreshToken = function (token, callback) {
-	RefreshToken.findOne({where: {refreshToken: token}}).then(rs => {
+let renewRefreshToken = function (refreshToken, callback) {
+	RefreshToken.findOne({ where: { refreshToken: refreshToken } }).then(rs => {
 		if (rs) {
+			let decoded = decode(rs.token);
+			delete decoded.iat;
+			delete decoded.exp;
 			rs.expiredAt = Date.now() + TIME_OUT;
-			rs.save().then(() => {
-				callback(token);
+			rs.refreshToken = randToken.uid(64);
+			rs.token = sign(decoded, secretKey, { expiresIn: '48h' });
+			rs.save().then((r) => {
+				callback(r.token, r.refreshToken);
 			});
-			// let newToken = rs.toJSON();
-			// newToken.refreshToken = randToken.uid(64);
-			// newToken.expiredAt = Date.now() + TIME_OUT;
-			// Object.assign(rs, newToken).save().then(tk => {
-			//     callback(tk.refreshToken);
-			// }).catch(err => {
-			//     console.log(err);
-			//     callback(null);
-			// });
 		} else {
 			callback(null);
 		}
@@ -50,7 +62,7 @@ let renewRefreshToken = function (token, callback) {
 }
 
 let destroyRefreshToken = function (token, callback) {
-	RefreshToken.findOne({where: {refreshToken: token}}).then(rs => {
+	RefreshToken.findOne({ where: { refreshToken: token } }).then(rs => {
 		if (rs) {
 			rs.destroy().then(() => {
 				callback(token);
@@ -64,21 +76,23 @@ let destroyRefreshToken = function (token, callback) {
 	});
 }
 
-let clearTokenByUser = function (idUser, callback) {
-	RefreshToken.findAll({where: {idUser: idUser}}).then(tokens => {
-		asyncEach(tokens, function (token, next) {
-			token.destroy().then(() => {
-				console.log("Deleted refresh token : ", token.refreshToken);
-				next();
-			}).catch(err => {
-				next();
+let clearTokenByUser = function (idUser) {
+	return new Promise(resolve => {
+		RefreshToken.findAll({ where: { idUser: idUser } }).then(tokens => {
+			asyncEach(tokens, function (token, next) {
+				token.destroy().then(() => {
+					console.log("Deleted refresh token : ", token.refreshToken);
+					next();
+				}).catch(err => {
+					next();
+				});
+			}, function () {
+				resolve();
 			});
-		}, function () {
-			callback(false, true);
+		}).catch(err => {
+			resolve();
 		});
-	}).catch(err => {
-		callback(err, null);
-	});
+	})
 };
 setTimeout(function () {
 	console.log("Start clean refresh token");
@@ -128,5 +142,6 @@ module.exports = {
 	checkRefreshToken: checkRefreshToken,
 	renewRefreshToken: renewRefreshToken,
 	destroyRefreshToken: destroyRefreshToken,
-	clearTokenByUser: clearTokenByUser
+	clearTokenByUser: clearTokenByUser,
+	findRefreshToken
 };

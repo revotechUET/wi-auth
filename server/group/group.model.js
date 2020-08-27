@@ -14,7 +14,7 @@ async function createNewGroup(data, done, username) {
 }
 
 async function listGroup(data, done, decoded) {
-    if (decoded.whoami === 'main-service') {
+    if (decoded.whoami === 'wi-angular') {
         if (data.singleUser) {
             if (/^su_/.test(data.singleUser)) {
                 data.singleUser = data.singleUser.substring(data.singleUser.indexOf('su_') + 3);
