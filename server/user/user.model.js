@@ -239,25 +239,30 @@ function checkLicense(idCompany, cb) {
 function changeUserStatus(userInfo, done) {
     User.findByPk(userInfo.idUser).then(user => {
         if (user) {
-            if (userInfo.status === "Active") {
-                checkLicense(user.idCompany, function (pass) {
-                    if (pass) {
-                        Object.assign(user, userInfo).save().then(u => {
-                            done(ResponseJSON(200, "Done", u));
-                        }).catch(err => {
-                            done(ResponseJSON(512, err.message, err.message));
-                        });
-                    } else {
-                        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Your licenses limited. Can't avtive more user!"));
-                    }
-                })
-            } else {
-                Object.assign(user, userInfo).save().then(u => {
-                    done(ResponseJSON(200, "Done", u));
-                }).catch(err => {
-                    done(ResponseJSON(512, err.message, err.message));
-                });
-            }
+            // if (userInfo.status === "Active") {
+            //     checkLicense(user.idCompany, function (pass) {
+            //         if (pass) {
+            //             Object.assign(user, userInfo).save().then(u => {
+            //                 done(ResponseJSON(200, "Done", u));
+            //             }).catch(err => {
+            //                 done(ResponseJSON(512, err.message, err.message));
+            //             });
+            //         } else {
+            //             done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Your licenses limited. Can't avtive more user!"));
+            //         }
+            //     })
+            // } else {
+            //     Object.assign(user, userInfo).save().then(u => {
+            //         done(ResponseJSON(200, "Done", u));
+            //     }).catch(err => {
+            //         done(ResponseJSON(512, err.message, err.message));
+            //     });
+            // }
+            Object.assign(user, userInfo).save().then(u => {
+                done(ResponseJSON(200, "Done", u));
+            }).catch(err => {
+                done(ResponseJSON(512, err.message, err.message));
+            });
         } else {
             done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "No user found"));
         }
