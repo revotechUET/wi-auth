@@ -3,9 +3,6 @@ const router = express.Router();
 const Model = require('./license.model');
 let models = require("../models-master/index");
 let ResponseJSON = require('../response');
-let bodyParser = require('body-parser');
-
-router.use(bodyParser.json());
 
 router.post('/user/license', (req, res) => {
     Model.getUserLicense(req.body, (status) => {

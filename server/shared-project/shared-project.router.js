@@ -1,7 +1,5 @@
 let router = require('express').Router();
-let bodyParser = require('body-parser');
 let shareProjectModel = require('./shared-project.model');
-router.use(bodyParser.json());
 
 router.post('/shared-project/new', function (req, res) {
     shareProjectModel.createNewSharedProject(req.body, function (status) {

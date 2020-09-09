@@ -1,8 +1,6 @@
 let express = require('express');
 let router = express.Router();
 let model = require('./user.model');
-let bodyParser = require('body-parser');
-router.use(bodyParser.json());
 
 router.post('/user/list', function (req, res) {
 	model.listUser(req.body, function (status) {

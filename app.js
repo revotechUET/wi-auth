@@ -31,8 +31,10 @@ let logoutRouter = require('./server/authenticate/logout');
 let http = require('http').Server(app);
 
 app.use(express.static('public'));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({limit: '10mb'}));
 app.get('/', async function (req, res) {
-    res.json({serverId: serverId, version: 4.0});
+    res.json({ serverId: serverId, version: 4.0 });
     // const routes = require('express-list-endpoints')(app);
     // res.send(routes);
 });

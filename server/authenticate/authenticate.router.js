@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 let models = require('../models-master');
-let bodyParser = require('body-parser');
 let User = models.User;
 let ResponseJSON = require('../response');
 let ErrorCodes = require('../../error-codes').CODES;
@@ -18,7 +17,6 @@ let companyModel = require('../company/company.model');
 router.use(passport.initialize());
 
 let secretKey = process.env.AUTH_JWTKEY || "secretKey";
-router.use(bodyParser.json());
 
 router.post('/refresh-token', function (req, res) {
     let refreshToken = req.body.refreshToken || req.query.refreshToken || req.header['x-access-refresh-token'];

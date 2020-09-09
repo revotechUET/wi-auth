@@ -1,8 +1,6 @@
 let express = require('express');
 let router = express.Router();
-let bodyParser = require('body-parser');
 let groupModel = require('./group.model');
-router.use(bodyParser.json());
 
 router.post("/group/new", function (req, res) {
     groupModel.createNewGroup(req.body, function (data) {
