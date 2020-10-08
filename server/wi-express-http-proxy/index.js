@@ -43,6 +43,7 @@ module.exports = function proxy() {
         switch (service) {
             case "WI_PROCESSING":
                 host = process.env.WI_PROCESSING || config.WI_PROCESSING || "unknown.i2g.cloud";
+                break;
             case "WI_BACKEND":
                 host = process.env.WI_BACKEND || config.WI_BACKEND || "unknown.i2g.cloud";
                 break;
