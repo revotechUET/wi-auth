@@ -43,6 +43,17 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING(500),
             allowNull: true,
             defaultValue: "[]"
+        },
+        taxonomies: {
+            type: DataTypes.TEXT('medium'),
+			allowNull: true,
+			set(value) {
+				this.setDataValue('content', typeof(value) === 'object' ? JSON.stringify(value) : value);
+			},
+			get() {
+				const value = this.getDataValue('content');
+				return JSON.parse(value);
+			}
         }
     });
 };
