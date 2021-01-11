@@ -48,10 +48,10 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.TEXT('medium'),
 			allowNull: true,
 			set(value) {
-				this.setDataValue('content', typeof(value) === 'object' ? JSON.stringify(value) : value);
+				this.setDataValue('taxonomies', typeof(value) === 'object' ? JSON.stringify(value) : value);
 			},
 			get() {
-				const value = this.getDataValue('content');
+				const value = this.getDataValue('taxonomies');
 				return JSON.parse(value);
 			}
         }
