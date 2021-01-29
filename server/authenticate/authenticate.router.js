@@ -62,7 +62,7 @@ passport.use(new LocalStrategy({
                 };
 
                 let logedin = await checkUserLogedIn(user.idUser);
-                if (logedin && process.env.MULTI_LOGIN === "NotAllowed") await refreshTokenModel.clearTokenByUser(user.idUser);
+                if (logedin && process.env.MULTI_LOGIN === "NotAllowed" && req.body.client_id !== "sync-app") await refreshTokenModel.clearTokenByUser(user.idUser);
                 return done(null, {
                     status: true,
                     user: user
