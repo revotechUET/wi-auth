@@ -68,5 +68,9 @@ module.exports = function (sequelize, DataTypes) {
                 return JSON.parse(value);
             }
         },
+        last_logged_in: {
+            type: DataTypes.DATE,
+            allowNull: true
+        }
     });
 };
