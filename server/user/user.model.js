@@ -109,7 +109,7 @@ function infoUser(userInfo, done, req) {
         })
     } else {
         User.findOne({ where: { username: req.decoded.username }, include: { model: Company } }).then(u => {
-            if(!u){
+            if (!u) {
                 done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "User not found"));
             } else {
                 done(ResponseJSON(ErrorCodes.SUCCESS, "Done", u));
@@ -395,12 +395,12 @@ function deleteUser(userInfo, done) {
 
 function getPermission(payload, done, username) {
     let _user = payload.username || username;
-    let permission = require('../utils/default-permission---------');
+    let permission = require('../utils/default-permission.json');
     for (let key in permission) {
         permission[key] = false;
     }
     if (!payload.project_name) {
-        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Need projectname"));
+        done(ResponseJSON(ErrorCodes.ERROR_INVALID_PARAMS, "Need Project Name"));
     } else {
         User.findOne({
             where: { username: _user },

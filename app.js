@@ -32,13 +32,13 @@ let http = require('http').Server(app);
 
 app.use(express.static('public'));
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({limit: '10mb'}));
+app.use(express.urlencoded({ limit: '10mb' }));
 app.get('/', async function (req, res) {
     res.json({ serverId: serverId, version: 4.0 });
     // const routes = require('express-list-endpoints')(app);
     // res.send(routes);
 });
-
+app.use('/', require('./server/patch/patch.router'));
 //use authenticate
 app.use(cookieParser());
 app.use(cors());
@@ -59,6 +59,8 @@ app.use('/', companyRouter);
 app.use('/', licenseRouter);
 app.use('/', keysRouter);
 app.use('/', logoutRouter);
+
+
 http.listen(process.env.AUTH_PORT || config.port, function () {
     console.log("Listening on port " + (process.env.AUTH_PORT || config.port), " Server ID: ", serverId);
 });
