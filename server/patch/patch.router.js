@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 let { Company, User, Group } = require("../models-master/index");
+let Model = require('../models-master/index');
 
 
 router.get('/patch', (req, res) => {
@@ -25,6 +26,19 @@ router.get('/patch', (req, res) => {
                 let grs = await Group.findAll({ include: { model: User } });
                 res.send(grs);
             });
+            break;
+        }
+        case "resetPermission": {
+            Model.SharedProjectGroup.findAll().then(async rs => {
+                let resp = [];
+                for (let i = 0; i < rs.length; i++) {
+                    let newObj = rs[i].toJSON();
+                    let newPerm = require('../utils/default-permission.json');
+                    newObj.permission = newPerm;
+                    resp.push(await Object.assign(rs[i], newObj).save())
+                }
+                res.send(resp);
+            })
             break;
         }
     }
