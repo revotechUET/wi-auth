@@ -88,8 +88,8 @@ function addToGroup(data, done) {
                         });
                     } else {
                         rs.addGroup(data.idGroup, { through: { permission: defaultPerm } });
-                        done(ResponseJSON(200, 'Successful', rs));
                         doNotification(data.idGroup, rs, "add");
+                        done(ResponseJSON(200, 'Successful', rs));
                     }
                 } else {
                     done(ResponseJSON(512, "Share key isn't correct"));
@@ -102,8 +102,8 @@ function addToGroup(data, done) {
             Model.SharedProject.findByPk(data.idSharedProject).then(rs => {
                 let defaultPerm = require('../utils/default-permission.json');
                 rs.addGroup(data.idGroup, { through: { permission: defaultPerm } });
-                done(ResponseJSON(200, 'Successful', data));
                 doNotification(data.idGroup, rs, "add");
+                done(ResponseJSON(200, 'Successful', data));
             }).catch(err => {
                 done(ResponseJSON(512, err, err));
             });
