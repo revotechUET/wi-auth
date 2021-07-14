@@ -179,7 +179,12 @@ function doNotification(idGroup, sharedProject, action) {
                     str = str.replace("__USER__", user.username);
                     str = str.replace("__SHARED_USER__", owner.username);
                     str = str.replace("__PROJECT_NAME__", sharedProject.project_name);
-                    str = str.replace("__WORKSPACE_URL__", process.env.WORKSPACE_URL ? process.env.WORKSPACE_URL : "https://wi.i2g.cloud")
+                    if (user.idCompany === 43) {
+                        //idCompany = 43 => BDPOC
+                        str = str.replace("__WORKSPACE_URL__", "http://10.17.31.75:8080/")
+                    } else {
+                        str = str.replace("__WORKSPACE_URL__", process.env.WORKSPACE_URL ? process.env.WORKSPACE_URL : "https://wi.i2g.cloud")
+                    }
                     notice && notice.sendMail({
                         to: user.email,
                         messageHtml: str,
@@ -192,7 +197,12 @@ function doNotification(idGroup, sharedProject, action) {
                     str = str.replace("__USER__", user.username);
                     str = str.replace("__SHARED_USER__", owner.username);
                     str = str.replace("__PROJECT_NAME__", sharedProject.project_name);
-                    str = str.replace("__WORKSPACE_URL__", process.env.WORKSPACE_URL ? process.env.WORKSPACE_URL : "https://wi.i2g.cloud")
+                    if (user.idCompany === 43) {
+                        //idCompany = 43 => BDPOC
+                        str = str.replace("__WORKSPACE_URL__", "http://10.17.31.75:8080/")
+                    } else {
+                        str = str.replace("__WORKSPACE_URL__", process.env.WORKSPACE_URL ? process.env.WORKSPACE_URL : "https://wi.i2g.cloud")
+                    }
                     notice && notice.sendMail({
                         to: user.email,
                         messageHtml: str,
