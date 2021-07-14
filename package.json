@@ -9,6 +9,7 @@
   "author": "wi-team",
   "license": "ISC",
   "dependencies": {
+    "@revotechuet/wi-notification": "^1.0.2",
     "async": "^2.6.0",
     "babel-preset-env": "^1.7.0",
     "body-parser": "^1.18.2",
