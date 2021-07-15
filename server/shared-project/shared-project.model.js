@@ -168,11 +168,10 @@ function doNotification(idGroup, sharedProject, action) {
         group = group.toJSON()
         //all users in groups
         let users = group.users;
-        let owner = users.find(u => u.idUser = sharedProject.idOwner);
-        console.log("==DEBUG ", users.length, owner, sharedProject)
+        let owner = users.find(u => u.idUser === sharedProject.idOwner);
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
-            console.log("Do noti for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.idUser);
+            console.log("Do notification for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.idUser);
             if (user.email && user.idUser !== sharedProject.idOwner) {
                 if (action === "add") {
                     console.log(`Send shared notification to email ${user.email} for project ${sharedProject.project_name}`)
