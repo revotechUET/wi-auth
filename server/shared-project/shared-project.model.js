@@ -169,12 +169,13 @@ function doNotification(idGroup, sharedProject, action) {
         //all users in groups
         let users = group.users;
         let owner = users.find(u => u.idUser = sharedProject.idOwner);
-        users.forEach(user => {
-            console.log("Do noti for user ", user.username, user.idUser, user.email, sharedProject.idOwner)
+        console.log("==DEBUG ", users.length, owner, sharedProject)
+        for (let i = 0; i < users.length; i++) {
+            let user = users[i];
+            console.log("Do noti for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.idUser);
             if (user.email && user.idUser !== sharedProject.idOwner) {
                 if (action === "add") {
                     console.log(`Send shared notification to email ${user.email} for project ${sharedProject.project_name}`)
-                    console.log(__dirname)
                     //let str = `Hi <b>${user.username}</b>,<br><br>Your group <b>${group.name}</b> has been shared new project named <b>${sharedProject.project_name}</b> by <b>${owner.username}</b><br/><p>If you have any question please contact us via email: <a href="mailto:support@i2g.cloud"> support@i2g.cloud></a></p><br><p>Best regards</p></br><p>The I2G Support team</p>`
                     let str = fs.readFileSync(__dirname + '/mail-template/add-share.html').toString()
                     str = str.replace("__USER__", user.username);
@@ -214,7 +215,7 @@ function doNotification(idGroup, sharedProject, action) {
                 }
 
             }
-        })
+        }
     })
 }
 
