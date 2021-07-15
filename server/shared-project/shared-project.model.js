@@ -168,7 +168,7 @@ function doNotification(idGroup, sharedProject, action) {
         group = group.toJSON()
         //all users in groups
         let users = group.users;
-        let owner = Model.User.findByPk(sharedProject.idOwner);
+        let owner = await Model.User.findByPk(sharedProject.idOwner);
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
             console.log("Do notification for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.username);
