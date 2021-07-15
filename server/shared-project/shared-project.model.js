@@ -164,14 +164,14 @@ function getSharedProjectList(data, done) {
 
 
 function doNotification(idGroup, sharedProject, action) {
-    Model.Group.findByPk(idGroup, { include: { model: Model.User } }).then(group => {
+    Model.Group.findByPk(idGroup, { include: { model: Model.User } }).then(async group => {
         group = group.toJSON()
         //all users in groups
         let users = group.users;
-        let owner = users.find(u => u.idUser === sharedProject.idOwner);
+        let owner = Model.User.findByPk(sharedProject.idOwner);
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
-            console.log("Do notification for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.idUser);
+            console.log("Do notification for user ", user.username, user.idUser, user.email, sharedProject.idOwner, owner.username);
             if (user.email && user.idUser !== sharedProject.idOwner) {
                 if (action === "add") {
                     console.log(`Send shared notification to email ${user.email} for project ${sharedProject.project_name}`)
