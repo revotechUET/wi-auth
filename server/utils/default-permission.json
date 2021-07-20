@@ -1,6 +1,8 @@
 {
   "project.import": true,
   "project.export": true,
+  "storageDb.get": true,
+  "storageDb.update": true,
   "well.get": true,
   "well.create": true,
   "well.update": true,
